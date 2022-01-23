@@ -46,7 +46,7 @@ namespace FlowRunner.LabelRun
         bool CatchException_LabelResolutionMiss(IRunningContext runningContext, LabelResolutionMissException e);
     }
 
-    public abstract class Pack
+    public class Pack
     {
         public Dictionary<string, int> Labels = new Dictionary<string, int>();
         public Statement[] Statements = new Statement[0];
