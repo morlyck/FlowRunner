@@ -67,7 +67,7 @@ namespace FlowRunner.LabelRun
     //
     public static class RunnerCore
     {
-        public static ILabelRunOrdertaker LabelRunOrdertaker;
+        public static ILabelRunOrdertaker LabelRunOrdertaker = null;
 
         //ラベルランナーの実行としての最小単位を実行します。
         //この関数が実行中はスナップショットによる復元性を保証しません。
@@ -75,6 +75,9 @@ namespace FlowRunner.LabelRun
         public static void ShotRun(IRunningContext runningContext) {
             //停止状態になっている場合は処理を切り上げる
             if (runningContext.IsHalting) return;
+
+            //オーダーテイカーがセットされていない場合は例外を投げる
+            if (LabelRunOrdertaker == null) throw new Exception("LabelRun オーダーテイカーがセットされていません");
 
             //ステートメントの取得
             Statement statement = runningContext.Statements[runningContext.ProgramCounter];
@@ -114,7 +117,7 @@ namespace FlowRunner.LabelRun
 
             if (!targetLabels.ContainsKey(label)) {
                 runningContext.IsHalting = true;
-                throw new Exception("LabelRunner ラベルの解決に失敗しました");
+                throw new Exception("LabelRun ラベルの解決に失敗しました");
                 return -1;
             }
             return targetLabels[label];
