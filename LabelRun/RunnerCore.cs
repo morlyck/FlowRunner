@@ -227,7 +227,7 @@ namespace FlowRunner.LabelRun
             }
 
             //移動先が有効か確認します
-            if (!(runningContext.ProgramCounter <= runningContext.Statements.Length)) {
+            if (runningContext.ProgramCounter < 0 || !(runningContext.ProgramCounter <= runningContext.Statements.Length)) {
                 runningContext.IsHalting = true;
                 throw new ProgramCounterOutOfRangeException($"プログラムカウンターが有効な範囲にありません。 PC : {runningContext.ProgramCounter} Statements.Length : {runningContext.Statements.Length} PackCode : {runningContext.CurrentPackCode}");
             }
