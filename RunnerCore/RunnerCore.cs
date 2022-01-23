@@ -8,10 +8,10 @@ namespace FlowRunner.Engine
 {
     public interface IRunnerCoreOrdertaker
     {
-        IPack GetPack(IRunningContext runningContext, string packCode);
-        ICommandExecutionContext Evaluation_ArgumentExpansion(IRunningContext runningContext, string commandSymbol, string packCode, string label, string expansionArgumentText);
+        Pack GetPack(IRunningContext runningContext, string packCode);
+        CommandExecutionContext Evaluation_ArgumentExpansion(IRunningContext runningContext, string commandSymbol, string packCode, string label, string expansionArgumentText);
         //コマンドの実行を行わなかった場合の戻り値 : false
-        bool ExecutionExpansionCommand(IRunningContext runningContext, string commandSymbol, ICommandExecutionContext commandExecutionContext);
+        bool ExecutionExpansionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext);
     }
 
     //仕様
@@ -29,10 +29,10 @@ namespace FlowRunner.Engine
             if (runningContext.IsHalting) return;
 
             //ステートメントの取得
-            IStatement statement = runningContext.Statements[runningContext.ProgramCounter];
+            Statement statement = runningContext.Statements[runningContext.ProgramCounter];
 
             //引数の評価
-            ICommandExecutionContext commandExecutionContext = null;
+            CommandExecutionContext commandExecutionContext = null;
             if (!statement.ArgumentEvaluationExpansionMode) {
                 //引数評価を非拡張モードで行います。
                 commandExecutionContext = runningContext.BuildinCommandExecutionContext;
@@ -73,7 +73,7 @@ namespace FlowRunner.Engine
         }
 
         //コマンドの実行を行う関数です
-        static void ExecutionCommand(IRunningContext runningContext, string commandSymbol, ICommandExecutionContext commandExecutionContext) {
+        static void ExecutionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext) {
 
             //コマンドシンボルごとの処理を行います
 
@@ -140,7 +140,7 @@ namespace FlowRunner.Engine
 
             //必要であればパックをロードします
             if (nextPackCode != "" && nextPackCode != runningContext.CurrentPackCode) {
-                IPack pack = RunnerCoreOrdertaker.GetPack(runningContext, nextPackCode);
+                Pack pack = RunnerCoreOrdertaker.GetPack(runningContext, nextPackCode);
                 runningContext.Labels = pack.Labels;
                 runningContext.Statements = pack.Statements;
 
@@ -166,7 +166,7 @@ namespace FlowRunner.Engine
     {
         bool IsHalting { get; set; }
         Dictionary<string, int> Labels { get; set; }
-        IStatement[] Statements { get; set; }
+        Statement[] Statements { get; set; }
 
         int ProgramCounter { get; set; }
         string CurrentPackCode { get; set; }
@@ -181,7 +181,7 @@ namespace FlowRunner.Engine
     {
         public bool IsHalting { get; set; } = true;
         public Dictionary<string, int> Labels { get; set; } = new Dictionary<string, int>();
-        public IStatement[] Statements { get; set; } = new IStatement[0];
+        public Statement[] Statements { get; set; } = new Statement[0];
         public int ProgramCounter { get; set; } = 0;
         public string CurrentPackCode { get; set; } = "";
         public Stack<StackFrame> CallStack { get; set; } = new Stack<StackFrame>();
@@ -192,55 +192,34 @@ namespace FlowRunner.Engine
 
     public class StackFrame
     {
-        public string PackCode;
-        public int ProgramCounter;
+        public string PackCode = "";
+        public int ProgramCounter = -1;
     }
 
-    public interface IPack
+    public abstract class Pack
     {
-        Dictionary<string, int> Labels { get; }
-        IStatement[] Statements { get; }
-    }
-    public class Pack : IPack
-    {
-        public Dictionary<string, int> Labels { get; set; } = new Dictionary<string, int>();
-        public IStatement[] Statements { get; set; } = new IStatement[0];
+        public Dictionary<string, int> Labels = new Dictionary<string, int>();
+        public Statement[] Statements = new Statement[0];
     }
 
-    public interface IStatement
+    public abstract class Statement
     {
-        string CommandSymbol { get; }
-        string PackCode { get; }
-        string Label { get; }
-        bool ArgumentEvaluationExpansionMode { get; }
-        string ArgumentText { get; }
+        public string CommandSymbol = "";
+        public string PackCode = "";
+        public string Label = "";
+        public bool ArgumentEvaluationExpansionMode = false;
+        public string ArgumentText = "";
     }
-    public class Statement : IStatement
+    public abstract class CommandExecutionContext
     {
-        public string CommandSymbol { get; set; } = "";
-        public string PackCode { get; set; } = "";
-        public string Label { get; set; } = "";
-        public bool ArgumentEvaluationExpansionMode { get; set; } = false;
-        public string ArgumentText { get; set; } = "";
-    }
-    public interface ICommandExecutionContext
-    {
-        string JumpPackCode { get; set; }
-        string JumpLabel { get; set; }
-        string ArgumentText { get; set; }
+        public string JumpPackCode = "";
+        public string JumpLabel = "";
+        public string ArgumentText = "";
 
-        bool ReturnFlag { get; set; }
-        bool PushFlag { get; set; }
-        bool JumpFlag { get; set; }
+        public bool ReturnFlag = false;
+        public bool PushFlag = false;
+        public bool JumpFlag = false;
     }
-    public class BuildinCommandExecutionContext : ICommandExecutionContext
-    {
-
-        public string JumpPackCode { get; set; }
-        public string JumpLabel { get; set; }
-        public string ArgumentText { get; set; } = "";
-        public bool ReturnFlag { get; set; }
-        public bool PushFlag { get; set; }
-        public bool JumpFlag { get; set; }
-    }
+    public class BuildinCommandExecutionContext : CommandExecutionContext
+    { }
 }
