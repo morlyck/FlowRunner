@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FlowRunner.Engine
 {
-    public class LabelRunnerEngine
+    public class FlowRunnerEngine
     {
         public void Update() {
 
