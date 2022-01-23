@@ -29,7 +29,7 @@ namespace FlowRunner.LabelRun
         //
         BuildinCommandExecutionContext BuildinCommandExecutionContext { get; }
     }
-    public interface IRunnerCoreOrdertaker
+    public interface ILabelRunOrdertaker
     {
         Pack GetPack(IRunningContext runningContext, string packCode);
         CommandExecutionContext Evaluation_ArgumentExpansion(IRunningContext runningContext, string commandSymbol, string packCode, string label, string expansionArgumentText);
@@ -67,7 +67,7 @@ namespace FlowRunner.LabelRun
     //
     public static class RunnerCore
     {
-        public static IRunnerCoreOrdertaker RunnerCoreOrdertaker;
+        public static ILabelRunOrdertaker LabelRunOrdertaker;
 
         //ラベルランナーの実行としての最小単位を実行します。
         //この関数が実行中はスナップショットによる復元性を保証しません。
@@ -91,7 +91,7 @@ namespace FlowRunner.LabelRun
 
             } else {
                 //引数評価を拡張モードで行います。
-                commandExecutionContext = RunnerCoreOrdertaker.Evaluation_ArgumentExpansion(runningContext, statement.CommandSymbol, statement.PackCode, statement.Label, statement.ArgumentText);
+                commandExecutionContext = LabelRunOrdertaker.Evaluation_ArgumentExpansion(runningContext, statement.CommandSymbol, statement.PackCode, statement.Label, statement.ArgumentText);
             }
 
             //コンテキストの初期化
@@ -110,7 +110,7 @@ namespace FlowRunner.LabelRun
             //PackCodeが現在ロードしているパックを指していなかった場合はパックを取得する。
             Dictionary<string, int> targetLabels = (runningContext.CurrentPackCode == packCode) ?
                 runningContext.Labels :
-                RunnerCoreOrdertaker.GetPack(runningContext, label).Labels;
+                LabelRunOrdertaker.GetPack(runningContext, label).Labels;
 
             if (!targetLabels.ContainsKey(label)) {
                 runningContext.IsHalting = true;
@@ -127,7 +127,7 @@ namespace FlowRunner.LabelRun
 
             //拡張コマンドの実行
             //コマンドの実行を行わなかった場合の戻り値 : false
-            bool ran = RunnerCoreOrdertaker.ExecutionExpansionCommand(runningContext, commandSymbol, commandExecutionContext);
+            bool ran = LabelRunOrdertaker.ExecutionExpansionCommand(runningContext, commandSymbol, commandExecutionContext);
 
             //拡張コマンドの実行がなかった場合はビルドインコマンドを実行します
             if (!ran) {
@@ -188,7 +188,7 @@ namespace FlowRunner.LabelRun
 
             //必要であればパックをロードします
             if (nextPackCode != "" && nextPackCode != runningContext.CurrentPackCode) {
-                Pack pack = RunnerCoreOrdertaker.GetPack(runningContext, nextPackCode);
+                Pack pack = LabelRunOrdertaker.GetPack(runningContext, nextPackCode);
                 runningContext.Labels = pack.Labels;
                 runningContext.Statements = pack.Statements;
 
