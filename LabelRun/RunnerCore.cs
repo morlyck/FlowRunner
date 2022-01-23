@@ -137,7 +137,7 @@ namespace FlowRunner.LabelRun
         static int GetStatementIndex_LabelResolution(IRunningContext runningContext, string packCode, string label) {
             if (label == "") return -1;
 
-            //PackCodeが現在ロードしているパックを指していなかった場合はパックを取得する。
+            //PackCodeが指しているパックが現在ロードされていない場合はパックを取得する。
             Dictionary<string, int> targetLabels = (runningContext.CurrentPackCode == packCode) ?
                 runningContext.Labels :
                 LabelRunOrdertaker.GetPack(runningContext, label).Labels;
