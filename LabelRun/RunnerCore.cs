@@ -28,6 +28,8 @@ namespace FlowRunner.LabelRun
 
         //
         BuildinCommandExecutionContext BuildinCommandExecutionContext { get; }
+
+        void SetLabelsAndStatements(Pack pack);
     }
     public interface ILabelRunOrdertaker
     {
@@ -204,6 +206,9 @@ namespace FlowRunner.LabelRun
                 StackFrame stackFrame = runningContext.CallStack.Pop();
                 runningContext.CurrentPackCode = stackFrame.PackCode;
                 runningContext.ProgramCounter = stackFrame.ProgramCounter;
+
+                //ランニングコンテキストのパックキャッシュを更新する
+                runningContext.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runningContext, runningContext.CurrentPackCode));
             }
 
             //移動先のPCを決定します
@@ -219,11 +224,10 @@ namespace FlowRunner.LabelRun
 
             //必要であればパックをロードします
             if (nextPackCode != "" && nextPackCode != runningContext.CurrentPackCode) {
-                Pack pack = LabelRunOrdertaker.GetPack(runningContext, nextPackCode);
-                runningContext.Labels = pack.Labels;
-                runningContext.Statements = pack.Statements;
-
                 runningContext.CurrentPackCode = nextPackCode;
+
+                //ランニングコンテキストのパックキャッシュを更新する
+                runningContext.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runningContext, nextPackCode));
             }
 
             //移動先が有効か確認します

@@ -19,5 +19,10 @@ namespace FlowRunner.Engine
 
         //
         public BuildinCommandExecutionContext BuildinCommandExecutionContext { get; } = new BuildinCommandExecutionContext();
+
+        public void SetLabelsAndStatements(Pack pack) {
+            Labels = pack.Labels;
+            Statements = pack.Statements;
+        }
     }
 }
