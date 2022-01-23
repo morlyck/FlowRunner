@@ -35,6 +35,15 @@ namespace FlowRunner.LabelRun
         CommandExecutionContext Evaluation_ArgumentExpansion(IRunningContext runningContext, string commandSymbol, string packCode, string label, string expansionArgumentText);
         //コマンドの実行を行わなかった場合の戻り値 : false
         bool ExecutionExpansionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext);
+
+        //例外処理
+        //リスローする場合は戻り値 : false
+        //無効なコマンドを実行しようとしたとき
+        bool CatchException_InvalidCommand(IRunningContext runningContext, InvalidCommandException e);
+        //PCが有効範囲外であるとき
+        bool CatchException_ProgramCounterOutOfRange(IRunningContext runningContext, ProgramCounterOutOfRangeException e);
+        //ラベルの解決に失敗したとき
+        bool CatchException_LabelResolutionMiss(IRunningContext runningContext, LabelResolutionMissException e);
     }
 
     public abstract class Pack
@@ -76,34 +85,52 @@ namespace FlowRunner.LabelRun
             //停止状態になっている場合は処理を切り上げる
             if (runningContext.IsHalting) return;
 
-            //オーダーテイカーがセットされていない場合は例外を投げる
-            if (LabelRunOrdertaker == null) throw new Exception("LabelRun オーダーテイカーがセットされていません");
+            try {
+                //オーダーテイカーがセットされていない場合は例外を投げる
+                if (LabelRunOrdertaker == null) throw new Null_LabelRunOrdertakerException("オーダーテイカーがセットされていません");
 
-            //ステートメントの取得
-            Statement statement = runningContext.Statements[runningContext.ProgramCounter];
+                //ステートメントの取得
+                Statement statement = runningContext.Statements[runningContext.ProgramCounter];
 
-            //引数の評価
-            CommandExecutionContext commandExecutionContext = null;
-            if (!statement.ArgumentEvaluationExpansionMode) {
-                //引数評価を非拡張モードで行います。
-                commandExecutionContext = runningContext.BuildinCommandExecutionContext;
-                //ステートメントの値をセット
-                commandExecutionContext.JumpPackCode = statement.PackCode;
-                commandExecutionContext.JumpLabel = statement.Label;
-                commandExecutionContext.ArgumentText = statement.ArgumentText;
+                //引数の評価
+                CommandExecutionContext commandExecutionContext = null;
+                if (!statement.ArgumentEvaluationExpansionMode) {
+                    //引数評価を非拡張モードで行います。
+                    commandExecutionContext = runningContext.BuildinCommandExecutionContext;
+                    //ステートメントの値をセット
+                    commandExecutionContext.JumpPackCode = statement.PackCode;
+                    commandExecutionContext.JumpLabel = statement.Label;
+                    commandExecutionContext.ArgumentText = statement.ArgumentText;
 
-            } else {
-                //引数評価を拡張モードで行います。
-                commandExecutionContext = LabelRunOrdertaker.Evaluation_ArgumentExpansion(runningContext, statement.CommandSymbol, statement.PackCode, statement.Label, statement.ArgumentText);
+                } else {
+                    //引数評価を拡張モードで行います。
+                    commandExecutionContext = LabelRunOrdertaker.Evaluation_ArgumentExpansion(runningContext, statement.CommandSymbol, statement.PackCode, statement.Label, statement.ArgumentText);
+                }
+
+                //コンテキストの初期化
+                commandExecutionContext.ReturnFlag = false;
+                commandExecutionContext.PushFlag = false;
+                commandExecutionContext.JumpFlag = false;
+
+                //コマンドの実行
+                ExecutionCommand(runningContext, statement.CommandSymbol, commandExecutionContext);
+
+            } catch (Null_LabelRunOrdertakerException e) {
+                //オーダーテイカーがセットされていない場合は無条件でリスロー
+                throw;
+            } catch (InvalidCommandException e) {
+                //無効なコマンドを実行しようとしたとき
+                if (!LabelRunOrdertaker.CatchException_InvalidCommand(runningContext, e)) throw;
+            } catch (ProgramCounterOutOfRangeException e) {
+                //PCが有効範囲外であるとき
+                if (!LabelRunOrdertaker.CatchException_ProgramCounterOutOfRange(runningContext, e)) throw;
+            } catch (LabelResolutionMissException e) {
+                //ラベルの解決に失敗したとき
+                if (!LabelRunOrdertaker.CatchException_LabelResolutionMiss(runningContext, e)) throw;
+            } catch (Exception_atLabelRun e) {
+                //その他のLabelRunの例外
+                throw;//リスロー
             }
-
-            //コンテキストの初期化
-            commandExecutionContext.ReturnFlag = false;
-            commandExecutionContext.PushFlag = false;
-            commandExecutionContext.JumpFlag = false;
-
-            //コマンドの実行
-            ExecutionCommand(runningContext, statement.CommandSymbol, commandExecutionContext);
         }
 
         //ラベルが指すStatementIndex を取得します。
@@ -115,9 +142,10 @@ namespace FlowRunner.LabelRun
                 runningContext.Labels :
                 LabelRunOrdertaker.GetPack(runningContext, label).Labels;
 
+            if (targetLabels == null) throw new LabelResolutionMissException($"パックの取得に失敗しました runningContext:{runningContext} packCode:{packCode} label:{label}");
             if (!targetLabels.ContainsKey(label)) {
                 runningContext.IsHalting = true;
-                throw new Exception("LabelRun ラベルの解決に失敗しました");
+                throw new LabelResolutionMissException($"ラベルの解決に失敗しました runningContext:{runningContext}packCode:{packCode} label:{label}");
                 return -1;
             }
             return targetLabels[label];
@@ -137,7 +165,7 @@ namespace FlowRunner.LabelRun
                 switch (commandSymbol) {
                     default:
                         runningContext.IsHalting = true;
-                        throw new Exception("無効なCommandを実行しようとした");
+                        throw new InvalidCommandException("無効なCommandを実行しようとした");
                         break;
 
                     //以下ビルドインコマンド
@@ -201,7 +229,7 @@ namespace FlowRunner.LabelRun
             //移動先が有効か確認します
             if (!(runningContext.ProgramCounter <= runningContext.Statements.Length)) {
                 runningContext.IsHalting = true;
-                throw new Exception($"プログラムカウンターが有効な範囲にありません。 PC : {runningContext.ProgramCounter} Statements.Length : {runningContext.Statements.Length} PackCode : {runningContext.CurrentPackCode}");
+                throw new ProgramCounterOutOfRangeException($"プログラムカウンターが有効な範囲にありません。 PC : {runningContext.ProgramCounter} Statements.Length : {runningContext.Statements.Length} PackCode : {runningContext.CurrentPackCode}");
             }
 
             //コマンドの実行はこれにて完了です
@@ -218,4 +246,33 @@ namespace FlowRunner.LabelRun
 
     public class BuildinCommandExecutionContext : CommandExecutionContext
     { }
+
+
+    //例外
+    public class Exception_atLabelRun: Exception {
+        public Exception_atLabelRun(string? message) : base(message) { }
+    }
+    //オーダーテイカーが未セット
+    public class Null_LabelRunOrdertakerException : Exception_atLabelRun
+    {
+        public Null_LabelRunOrdertakerException(string? message) : base(message) { }
+    }
+    //無効なコマンドを実行しようとした
+    public class InvalidCommandException : Exception_atLabelRun
+    {
+        public InvalidCommandException(string? message) : base(message) { }
+    }
+    //無効なコマンドを実行しようとした
+    public class ProgramCounterOutOfRangeException : Exception_atLabelRun
+    {
+        public ProgramCounterOutOfRangeException(string? message) : base(message) { }
+    }
+    //ラベルの解決に失敗した
+    public class LabelResolutionMissException : Exception_atLabelRun
+    {
+        public LabelResolutionMissException(string? message) : base(message) { }
+    }
+
+
+
 }
