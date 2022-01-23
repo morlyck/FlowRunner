@@ -138,9 +138,9 @@ namespace FlowRunner.LabelRun
             if (label == "") return -1;
 
             //PackCodeが指しているパックが現在ロードされていない場合はパックを取得する。
-            Dictionary<string, int> targetLabels = (runningContext.CurrentPackCode == packCode) ?
+            Dictionary<string, int> targetLabels = (runningContext.CurrentPackCode == packCode || packCode == "") ?
                 runningContext.Labels :
-                LabelRunOrdertaker.GetPack(runningContext, label).Labels;
+                LabelRunOrdertaker.GetPack(runningContext, packCode).Labels;
 
             if (targetLabels == null) throw new LabelResolutionMissException($"パックの取得に失敗しました runningContext:{runningContext} packCode:{packCode} label:{label}");
             if (!targetLabels.ContainsKey(label)) {
