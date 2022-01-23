@@ -4,14 +4,62 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+//
+using FlowRunner.Engine;
+
 namespace FlowRunner.Engine
 {
+    public partial interface IRunningContext : FlowRunner.LabelRun.IRunningContext_atLabelRun
+    { }
+}
+
+namespace FlowRunner.LabelRun
+{
+    public interface IRunningContext_atLabelRun
+    {
+        bool IsHalting { get; set; }
+        Dictionary<string, int> Labels { get; set; }
+        Statement[] Statements { get; set; }
+
+        int ProgramCounter { get; set; }
+        string CurrentPackCode { get; set; }
+
+        Stack<StackFrame> CallStack { get; set; }
+
+        //
+        BuildinCommandExecutionContext BuildinCommandExecutionContext { get; }
+    }
     public interface IRunnerCoreOrdertaker
     {
         Pack GetPack(IRunningContext runningContext, string packCode);
         CommandExecutionContext Evaluation_ArgumentExpansion(IRunningContext runningContext, string commandSymbol, string packCode, string label, string expansionArgumentText);
         //コマンドの実行を行わなかった場合の戻り値 : false
         bool ExecutionExpansionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext);
+    }
+
+    public abstract class Pack
+    {
+        public Dictionary<string, int> Labels = new Dictionary<string, int>();
+        public Statement[] Statements = new Statement[0];
+    }
+
+    public abstract class Statement
+    {
+        public string CommandSymbol = "";
+        public string PackCode = "";
+        public string Label = "";
+        public bool ArgumentEvaluationExpansionMode = false;
+        public string ArgumentText = "";
+    }
+    public abstract class CommandExecutionContext
+    {
+        public string JumpPackCode = "";
+        public string JumpLabel = "";
+        public string ArgumentText = "";
+
+        public bool ReturnFlag = false;
+        public bool PushFlag = false;
+        public bool JumpFlag = false;
     }
 
     //仕様
@@ -157,37 +205,6 @@ namespace FlowRunner.Engine
             return;
         }
 
-
-
-
-    }
-
-    public interface IRunningContext
-    {
-        bool IsHalting { get; set; }
-        Dictionary<string, int> Labels { get; set; }
-        Statement[] Statements { get; set; }
-
-        int ProgramCounter { get; set; }
-        string CurrentPackCode { get; set; }
-
-        Stack<StackFrame> CallStack { get; set; }
-
-        //
-        BuildinCommandExecutionContext BuildinCommandExecutionContext { get; }
-    }
-
-    public class RunningContext : IRunningContext
-    {
-        public bool IsHalting { get; set; } = true;
-        public Dictionary<string, int> Labels { get; set; } = new Dictionary<string, int>();
-        public Statement[] Statements { get; set; } = new Statement[0];
-        public int ProgramCounter { get; set; } = 0;
-        public string CurrentPackCode { get; set; } = "";
-        public Stack<StackFrame> CallStack { get; set; } = new Stack<StackFrame>();
-
-        //
-        public BuildinCommandExecutionContext BuildinCommandExecutionContext { get; } = new BuildinCommandExecutionContext();
     }
 
     public class StackFrame
@@ -196,30 +213,6 @@ namespace FlowRunner.Engine
         public int ProgramCounter = -1;
     }
 
-    public abstract class Pack
-    {
-        public Dictionary<string, int> Labels = new Dictionary<string, int>();
-        public Statement[] Statements = new Statement[0];
-    }
-
-    public abstract class Statement
-    {
-        public string CommandSymbol = "";
-        public string PackCode = "";
-        public string Label = "";
-        public bool ArgumentEvaluationExpansionMode = false;
-        public string ArgumentText = "";
-    }
-    public abstract class CommandExecutionContext
-    {
-        public string JumpPackCode = "";
-        public string JumpLabel = "";
-        public string ArgumentText = "";
-
-        public bool ReturnFlag = false;
-        public bool PushFlag = false;
-        public bool JumpFlag = false;
-    }
     public class BuildinCommandExecutionContext : CommandExecutionContext
     { }
 }
