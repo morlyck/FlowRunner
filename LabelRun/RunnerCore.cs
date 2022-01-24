@@ -202,20 +202,21 @@ namespace FlowRunner.LabelRun
             }
 
             //コールスタックからPackCodeとPCを復元します
+            bool packReloadFlag = false;
             if (commandExecutionContext.ReturnFlag) {
                 StackFrame stackFrame = runningContext.CallStack.Pop();
+
+                if (stackFrame.PackCode != runningContext.CurrentPackCode) packReloadFlag = true;
+
                 runningContext.CurrentPackCode = stackFrame.PackCode;
                 runningContext.ProgramCounter = stackFrame.ProgramCounter;
-
-                //ランニングコンテキストのパックキャッシュを更新する
-                runningContext.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runningContext, runningContext.CurrentPackCode));
             }
 
             //移動先のPCを決定します
-            string nextPackCode = "";
             if (commandExecutionContext.JumpFlag) {
                 //ジャンプする場合
-                nextPackCode = commandExecutionContext.JumpPackCode;
+                packReloadFlag = true;
+                runningContext.CurrentPackCode = commandExecutionContext.JumpPackCode;
                 runningContext.ProgramCounter = GetStatementIndex_LabelResolution(runningContext, commandExecutionContext.JumpPackCode, commandExecutionContext.JumpLabel);
             } else {
                 //次へ進む場合
@@ -223,11 +224,9 @@ namespace FlowRunner.LabelRun
             }
 
             //必要であればパックをロードします
-            if (nextPackCode != "" && nextPackCode != runningContext.CurrentPackCode) {
-                runningContext.CurrentPackCode = nextPackCode;
-
+            if (packReloadFlag) {
                 //ランニングコンテキストのパックキャッシュを更新する
-                runningContext.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runningContext, nextPackCode));
+                runningContext.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runningContext, runningContext.CurrentPackCode));
             }
 
             //移動先が有効か確認します
