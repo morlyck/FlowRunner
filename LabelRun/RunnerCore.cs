@@ -167,7 +167,7 @@ namespace FlowRunner.LabelRun
                 switch (commandSymbol) {
                     default:
                         runningContext.IsHalting = true;
-                        throw new InvalidCommandException("無効なCommandを実行しようとした");
+                        throw new InvalidCommandException($"無効なCommandを実行しようとした commandSymbol : {commandSymbol}");
                         break;
 
                     //以下ビルドインコマンド
