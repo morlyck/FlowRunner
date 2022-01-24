@@ -266,7 +266,7 @@ namespace FlowRunner.LabelRun
     {
         public InvalidCommandException(string? message) : base(message) { }
     }
-    //無効なコマンドを実行しようとした
+    //PCが有効範囲外を指している
     public class ProgramCounterOutOfRangeException : Exception_atLabelRun
     {
         public ProgramCounterOutOfRangeException(string? message) : base(message) { }
