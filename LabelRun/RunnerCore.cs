@@ -216,8 +216,11 @@ namespace FlowRunner.LabelRun
             if (commandExecutionContext.JumpFlag) {
                 //ジャンプする場合
                 packReloadFlag = true;
-                runningContext.CurrentPackCode = commandExecutionContext.JumpPackCode;
+                //ジャンプ先が省略されているときのcommandExecutionContext.JumpPackCodeの値は""
+                //runningContext.CurrentPackCode の値と引数のPackCodeの値が異なる場合はPackを取得してくれる
                 runningContext.ProgramCounter = GetStatementIndex_LabelResolution(runningContext, commandExecutionContext.JumpPackCode, commandExecutionContext.JumpLabel);
+                //GetStatementIndex_LabelResolutionを呼ぶ前にrunningContext.CurrentPackCodeの値を更新するとパックの取得をしてくれない
+                runningContext.CurrentPackCode = commandExecutionContext.JumpPackCode;
             } else {
                 //次へ進む場合
                 runningContext.ProgramCounter++;
