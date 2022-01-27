@@ -220,7 +220,7 @@ namespace FlowRunner.LabelRun
                 //runningContext.CurrentPackCode の値と引数のPackCodeの値が異なる場合はPackを取得してくれる
                 runningContext.ProgramCounter = GetStatementIndex_LabelResolution(runningContext, commandExecutionContext.JumpPackCode, commandExecutionContext.JumpLabel);
                 //GetStatementIndex_LabelResolutionを呼ぶ前にrunningContext.CurrentPackCodeの値を更新するとパックの取得をしてくれない
-                runningContext.CurrentPackCode = commandExecutionContext.JumpPackCode;
+                if (commandExecutionContext.JumpPackCode != "") runningContext.CurrentPackCode = commandExecutionContext.JumpPackCode;
             } else {
                 //次へ進む場合
                 runningContext.ProgramCounter++;
