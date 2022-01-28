@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace FlowRunner
 {
-    public class FlowRunnerEngine
+    public partial class FlowRunnerEngine
     {
-        public void Update() {
-
-        }
 
         //予め決められた回数実行する
 
@@ -19,8 +16,12 @@ namespace FlowRunner
 
 
         //停止するまで回し続ける
+        public void Update() {
+
+        }
 
 
+        
 
     }
 }
