@@ -32,7 +32,7 @@ namespace FlowRunner.Engine.Service
     {
         protected FlowRunnerEngine? engine { get; private set; } = null;
         protected IFlowRunnerService? service { get; private set; } = null;
-        protected FlowRunner.Engine.Infra.IFlowRunnerInfra? infra { get; private set; } = null;
+        protected Infra.IFlowRunnerInfra? infra { get; private set; } = null;
         public FlowRunnerService(FlowRunnerEngine engine) {
             this.engine = engine;
             this.service = engine.Service;

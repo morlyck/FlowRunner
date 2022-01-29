@@ -10,7 +10,7 @@ namespace FlowRunner
 {
     public partial class FlowRunnerEngine
     {
-        Engine.ITextFileIOInfra? IFlowRunnerInfra.TextFileIO { get; set; } = new Engine.Infra.TextFileIOInfra();
+        Engine.IGeneralSerializeDeserializeInfra? IFlowRunnerInfra.GeneralSd { get; set; } = null; //= new Engine.Infra.GeneralSerializeDeserializeInfra();
     }
 }
 
@@ -18,6 +18,6 @@ namespace FlowRunner.Engine.Infra
 {
     public partial interface IFlowRunnerInfra
     {
-        ITextFileIOInfra? TextFileIO { get; set; }
+        IGeneralSerializeDeserializeInfra? GeneralSd { get; set; }
     }
 }

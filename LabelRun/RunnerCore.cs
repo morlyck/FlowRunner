@@ -9,7 +9,7 @@ using FlowRunner.Engine;
 
 namespace FlowRunner.Engine
 {
-    public partial interface IRunningContext : FlowRunner.LabelRun.IRunningContext_atLabelRun
+    public partial interface IRunningContext : LabelRun.IRunningContext_atLabelRun
     { }
 }
 
