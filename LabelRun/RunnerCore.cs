@@ -76,14 +76,14 @@ namespace FlowRunner.LabelRun
     //仕様
     //・ビルドインのコマンドよりも拡張コマンドの方を優先して実行する((例)拡張コマンドとして"return"がある場合はビルドインコマンドは実行されない)
     //
-    public static class RunnerCore
+    public class RunnerCore
     {
-        public static ILabelRunOrdertaker LabelRunOrdertaker = null;
+        public ILabelRunOrdertaker LabelRunOrdertaker = null;
 
         //ラベルランナーの実行としての最小単位を実行します。
         //この関数が実行中はスナップショットによる復元性を保証しません。
         //実行中にスナップショットを作成するとデータが破損する場合があります。
-        public static void ShotRun(IRunningContext runningContext) {
+        public void ShotRun(IRunningContext runningContext) {
             //停止状態になっている場合は処理を切り上げる
             if (runningContext.IsHalting) return;
 
@@ -136,7 +136,7 @@ namespace FlowRunner.LabelRun
         }
 
         //ラベルが指すStatementIndex を取得します。
-        static int GetStatementIndex_LabelResolution(IRunningContext runningContext, string packCode, string label) {
+        int GetStatementIndex_LabelResolution(IRunningContext runningContext, string packCode, string label) {
             if (label == "") return -1;
 
             //PackCodeが指しているパックが現在ロードされていない場合はパックを取得する。
@@ -154,7 +154,7 @@ namespace FlowRunner.LabelRun
         }
 
         //コマンドの実行を行う関数です
-        static void ExecutionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext) {
+        void ExecutionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext) {
 
             //コマンドシンボルごとの処理を行います
 
