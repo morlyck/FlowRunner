@@ -136,7 +136,7 @@ namespace FlowRunner.LabelRun
         }
 
         //ラベルが指すStatementIndex を取得します。
-        int GetStatementIndex_LabelResolution(IRunningContext runningContext, string packCode, string label) {
+        public int GetStatementIndex_LabelResolution(IRunningContext runningContext, string packCode, string label) {
             if (label == "") return -1;
 
             //PackCodeが指しているパックが現在ロードされていない場合はパックを取得する。
