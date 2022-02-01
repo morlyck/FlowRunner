@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FlowRunner.Engine
 {
-    public interface ITextFileIOInfra
+    public interface IRepositoryInfra
     {
 
     }
@@ -16,7 +16,7 @@ namespace FlowRunner.Engine
 namespace FlowRunner.Engine.Infra
 {
 
-    public class TextFileIOInfra : ITextFileIOInfra
+    public class RepositoryInfra : IRepositoryInfra
     {
 
     }

@@ -10,7 +10,7 @@ namespace FlowRunner
 {
     public partial class FlowRunnerEngine
     {
-        Engine.ITextFileIOInfra? IFlowRunnerInfra.TextFileIO { get; set; } = new Engine.Infra.TextFileIOInfra();
+        Engine.IRepositoryInfra? IFlowRunnerInfra.Repository { get; set; } = new Engine.Infra.RepositoryInfra();
     }
 }
 
@@ -18,6 +18,6 @@ namespace FlowRunner.Engine.Infra
 {
     public partial interface IFlowRunnerInfra
     {
-        ITextFileIOInfra? TextFileIO { get; set; }
+        IRepositoryInfra? Repository { get; set; }
     }
 }
