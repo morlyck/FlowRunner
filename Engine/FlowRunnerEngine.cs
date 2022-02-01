@@ -8,7 +8,7 @@ namespace FlowRunner
 {
     public partial class FlowRunnerEngine
     {
-
+        /*
         //予め決められた回数実行する
 
 
@@ -19,9 +19,17 @@ namespace FlowRunner
         public void Update() {
 
         }
+        */
 
-
+        public FlowRunnerEngine() {
+            Initialization_Engine();
+        }
         
+        void Initialization_Engine() {
+            //サービスの初期化
+            Initialization_FlowRunnerService();
+
+        }
 
     }
 }
