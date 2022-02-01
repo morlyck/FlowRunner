@@ -10,13 +10,13 @@ namespace FlowRunner.Utl
     internal static class frUtl
     {
         public static void InvokeActionAll<typ>(this object target, object arg) {
-            foreach (MethodInfo info in target.GetType().GetMethods()) {
+            foreach (MethodInfo info in target.GetType().GetMethods(BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance)) {
                 if (info.GetCustomAttributes(typeof(typ), true).Length == 0) continue;
                 info.Invoke(target, new object[] { arg });
             }
         }
         public static void InvokeActionAll<typ>(this object target) {
-            foreach (MethodInfo info in target.GetType().GetMethods()) {
+            foreach (MethodInfo info in target.GetType().GetMethods(BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance)) {
                 if (info.GetCustomAttributes(typeof(typ), true).Length == 0) continue;
                 info.Invoke(target, null);
             }
@@ -25,7 +25,7 @@ namespace FlowRunner.Utl
             where typ : Attribute {
             Dictionary<int, Action> actions = new Dictionary<int, Action>();
 
-            foreach (MethodInfo info in target.GetType().GetMethods()) {
+            foreach (MethodInfo info in target.GetType().GetMethods(BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance)) {
                 if (info.GetCustomAttributes(typeof(typ), true).Length == 0) continue;
                 typ attribute = info.GetCustomAttribute<typ>();
                 Action action = () => info.Invoke(target, null);
@@ -43,7 +43,7 @@ namespace FlowRunner.Utl
             }
         }
 
-
+        
 
 
 
