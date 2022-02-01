@@ -10,7 +10,7 @@ namespace FlowRunner
 {
     public partial class FlowRunnerEngine
     {
-        Engine.IRepositoryInfra? IFlowRunnerInfra.Repository { get; set; } = new Engine.Infra.RepositoryInfra();
+        Engine.IRepositoryInfra? IFlowRunnerInfra.Repository { get; set; }
     }
 }
 
