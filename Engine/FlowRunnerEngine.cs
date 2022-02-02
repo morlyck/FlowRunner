@@ -26,8 +26,13 @@ namespace FlowRunner
         }
         
         void Initialization_Engine() {
+            //サイクルの初期化
+            Initialization_FlowRunnerCycle();
+
             //サービスの初期化
             Initialization_FlowRunnerService();
+
+
 
         }
 
