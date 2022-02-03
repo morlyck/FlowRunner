@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using FlowRunner.Utl;
 
+
 namespace FlowRunner
 {
     public partial class FlowRunnerEngine : Engine.Service.IFlowRunnerService
@@ -33,10 +34,12 @@ namespace FlowRunner.Engine.Service
         protected FlowRunnerEngine? engine { get; private set; } = null;
         protected IFlowRunnerService? service { get; private set; } = null;
         protected Infra.IFlowRunnerInfra? infra { get; private set; } = null;
+        protected Cycle.IFlowRunnerCycle? cycle { get; private set; } = null;
         public FlowRunnerService(FlowRunnerEngine engine) {
             this.engine = engine;
             this.service = engine.Service;
             this.infra = engine.Infra;
+            this.cycle = engine.Cycle;
 
             //初期化
             this.Initialization();
