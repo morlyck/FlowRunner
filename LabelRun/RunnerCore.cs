@@ -13,6 +13,34 @@ namespace FlowRunner.Engine
     { }
 }
 
+namespace FlowRunner.Engine
+{
+    public class Pack
+    {
+        public Dictionary<string, int> Labels = new Dictionary<string, int>();
+        public Statement[] Statements = new Statement[0];
+    }
+
+    public abstract class Statement
+    {
+        public string CommandSymbol = "";
+        public string PackCode = "";
+        public string Label = "";
+        public bool ArgumentEvaluationExpansionMode = false;
+        public string ArgumentText = "";
+    }
+    public abstract class CommandExecutionContext
+    {
+        public string JumpPackCode = "";
+        public string JumpLabel = "";
+        public string ArgumentText = "";
+
+        public bool ReturnFlag = false;
+        public bool PushFlag = false;
+        public bool JumpFlag = false;
+    }
+}
+
 namespace FlowRunner.LabelRun
 {
     public interface IRunningContext_atLabelRun
@@ -46,31 +74,6 @@ namespace FlowRunner.LabelRun
         bool CatchException_ProgramCounterOutOfRange(IRunningContext runningContext, ProgramCounterOutOfRangeException e);
         //ラベルの解決に失敗したとき
         bool CatchException_LabelResolutionMiss(IRunningContext runningContext, LabelResolutionMissException e);
-    }
-
-    public class Pack
-    {
-        public Dictionary<string, int> Labels = new Dictionary<string, int>();
-        public Statement[] Statements = new Statement[0];
-    }
-
-    public abstract class Statement
-    {
-        public string CommandSymbol = "";
-        public string PackCode = "";
-        public string Label = "";
-        public bool ArgumentEvaluationExpansionMode = false;
-        public string ArgumentText = "";
-    }
-    public abstract class CommandExecutionContext
-    {
-        public string JumpPackCode = "";
-        public string JumpLabel = "";
-        public string ArgumentText = "";
-
-        public bool ReturnFlag = false;
-        public bool PushFlag = false;
-        public bool JumpFlag = false;
     }
 
     //仕様
