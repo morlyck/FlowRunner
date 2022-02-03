@@ -13,12 +13,12 @@ namespace FlowRunner
     {
         public Engine.Service.IFlowRunnerService Service { get => this; }
 
+        List<Engine.Service.FlowRunnerService> flowRunnerServices = new List<Engine.Service.FlowRunnerService>();
+
         //サービスの初期化
         void Initialization_FlowRunnerService() {
             this.InvokeActionAll<Engine.Service.FlowRunnerServiceInitializationAttribute>();
         }
-
-        List<Engine.Service.FlowRunnerService> flowRunnerServices = new List<Engine.Service.FlowRunnerService>();
     }
 
 }
