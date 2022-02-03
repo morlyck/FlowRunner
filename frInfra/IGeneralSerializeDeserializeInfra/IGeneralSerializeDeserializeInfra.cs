@@ -10,6 +10,7 @@ namespace FlowRunner.Engine
     {
         string Serialize(object obj);
         typ Deserialize<typ>(string jsonText);
+        object Deserialize(Type typ, string jsonText);
     }
 }
 
