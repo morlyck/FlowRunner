@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 using System.Diagnostics;
 
+using FlowRunner.Engine;
+using FlowRunner.Utl;
+
 namespace FlowRunner
 {
     public partial class FlowRunnerEngine
@@ -24,6 +27,8 @@ namespace FlowRunner
 
         public async Task ResumeAsync(string snapshotCode) {
             string text = Infra.Repository.GetSnapshot(snapshotCode);
+            if (text == null || text == "") return;
+
             await Service.SnapshotService.ResumeAsync(text);
         }
 
@@ -45,16 +50,21 @@ namespace FlowRunner.Engine.Service
         //protected FlowRunner.Engine.Infra.IFlowRunnerInfra? infra { get; }
 
         public async Task<string> SuspendAsync() {
-            throw new NotImplementedException();
+            return Suspend();
         }
         public async Task ResumeAsync(string text) {
-            throw new NotImplementedException();
+            Resume(text);
         }
+
         public string Suspend() {
-            throw new NotImplementedException();
+            cycle.SuspendResumeCycle.SuspendCycle(out string text);
+            return text;
         }
-        public string Resume(string text) {
-            throw new NotImplementedException();
+        public void Resume(string text) {
+            cycle.SuspendResumeCycle.ResumeCycle(text);
         }
+
     }
+
+
 }
