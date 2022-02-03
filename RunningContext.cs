@@ -18,7 +18,7 @@ namespace FlowRunner.Engine
         public string CurrentPackCode { get; set; } = "";
         public Stack<StackFrame> CallStack { get; set; } = new Stack<StackFrame>();
     }
-    public class RunningContext : RunningContextSdReady,
+    public partial class RunningContext : RunningContextSdReady,
    IRunningContext
     {
         public RunningContextSdReady GetSdReady() {
