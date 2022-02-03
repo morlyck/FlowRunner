@@ -215,7 +215,7 @@ namespace FlowRunner.LabelRun
             //移動先のPCを決定します
             if (commandExecutionContext.JumpFlag) {
                 //ジャンプする場合
-                packReloadFlag = true;
+                if (commandExecutionContext.JumpPackCode != "") packReloadFlag = true;
                 //ジャンプ先が省略されているときのcommandExecutionContext.JumpPackCodeの値は""
                 //runningContext.CurrentPackCode の値と引数のPackCodeの値が異なる場合はPackを取得してくれる
                 runningContext.ProgramCounter = GetStatementIndex_LabelResolution(runningContext, commandExecutionContext.JumpPackCode, commandExecutionContext.JumpLabel);
