@@ -105,6 +105,7 @@ namespace FlowRunner.Engine
     {
         void Update();
     }
+
     public class FlowRunnerEngineNode : NodeCommon, INode
     {
         protected override ILabelRunOrdertaker LabelRunOrdertaker { get => this; }

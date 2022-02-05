@@ -10,6 +10,17 @@ namespace FlowRunner.Engine.Cycle
 {
     public partial class SnapshotFrame
     {
+
+        //
+        public List<string> NodeTypeNames = null;
+        public List<string> NodePaths = null;
+        public List<string> NodeSerializeTexts = null;
+
+        //
+        public string EngineNodeSerializeText = null;
+
+        //---
+
         [SuspendCycleTime]
         void SuspendCycleTime_byNode(FlowRunnerEngine engine) {
             NodePaths = new List<string>();
@@ -58,14 +69,12 @@ namespace FlowRunner.Engine.Cycle
                 node.Deserialize(engine, NodeSerializeTexts[index]);
 
             }
+
         }
 
-        //
-        public List<string> NodeTypeNames = null;
-        public List<string> NodePaths = null;
-        public List<string> NodeSerializeTexts = null;
 
-        //
-        public string EngineNodeSerializeText = null;
+
     }
+
+
 }
