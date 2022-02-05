@@ -8,7 +8,6 @@ using System.Diagnostics;
 
 using FlowRunner;
 using FlowRunner.Engine;
-using FlowRunner.LabelRun;
 using FlowRunner.Another;
 
 
@@ -45,7 +44,7 @@ namespace FlowRunner.Engine
             Root = root;
             Path = path;
         }
-        protected override LabelRun.ILabelRunOrdertaker LabelRunOrdertaker { get => this; }
+        protected override ILabelRunOrdertaker LabelRunOrdertaker { get => this; }
         public FlowRunnerEngine Engine { get => Root.Engine; }
 
         #region(INode)

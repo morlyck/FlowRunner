@@ -9,7 +9,7 @@ using FlowRunner.Engine;
 
 namespace FlowRunner.Engine
 {
-    public partial interface IRunningContext : LabelRun.IRunningContext_atLabelRun
+    public partial interface IRunningContext : Engine.IRunningContext_atLabelRun
     { }
 }
 
@@ -41,7 +41,7 @@ namespace FlowRunner.Engine
     }
 }
 
-namespace FlowRunner.LabelRun
+namespace FlowRunner.Engine
 {
     public interface IRunningContext_atLabelRun
     {

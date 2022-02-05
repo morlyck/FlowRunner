@@ -12,7 +12,6 @@ using Utl_Drifts;
 
 using FlowRunner;
 using FlowRunner.Engine;
-using FlowRunner.LabelRun;
 using FlowRunner.Another;
 
 namespace FlowRunner.Engine
@@ -55,7 +54,7 @@ namespace FlowRunner.Engine
 
     public abstract class NodeCommon
     {
-        protected abstract LabelRun.ILabelRunOrdertaker LabelRunOrdertaker { get; }
+        protected abstract ILabelRunOrdertaker LabelRunOrdertaker { get; }
 
         Dictionary<string, Runner> runners = new Dictionary<string, Runner>();
         List<Runner> anonymousRunners = new List<Runner>();
