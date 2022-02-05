@@ -79,7 +79,7 @@ namespace FlowRunner.Engine
     //仕様
     //・ビルドインのコマンドよりも拡張コマンドの方を優先して実行する((例)拡張コマンドとして"return"がある場合はビルドインコマンドは実行されない)
     //
-    public class RunnerCore
+    public class LabelRun
     {
         public ILabelRunOrdertaker LabelRunOrdertaker = null;
 

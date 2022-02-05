@@ -74,7 +74,7 @@ namespace FlowRunner.Engine
         protected void NodeDeserializeDelta(FlowRunnerEngine engine, ref NodeSdReadyCommon sdReady) {
             for (int index = 0; index < sdReady.RunnerCodes.Count; index++) {
                 Runner runner = engine.Infra.GeneralSd.Deserialize<Runner>(sdReady.RunnerTexts[index]);
-                runner.RunnerSetup(new RunnerCore(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.Contexts[index], engine.Infra));
+                runner.RunnerSetup(new LabelRun(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.Contexts[index], engine.Infra));
 
                 if (runner.Context.CurrentPackCode != "") {
                     runner.Context.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runner.Context, runner.Context.CurrentPackCode));
@@ -84,7 +84,7 @@ namespace FlowRunner.Engine
             }
             for (int index = 0; index < sdReady.AnonymousRunnerTexts.Count; index++) {
                 Runner runner = engine.Infra.GeneralSd.Deserialize<Runner>(sdReady.AnonymousRunnerTexts[index]);
-                runner.RunnerSetup(new RunnerCore(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.AnonymousContexts[index], engine.Infra));
+                runner.RunnerSetup(new LabelRun(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.AnonymousContexts[index], engine.Infra));
 
                 if (runner.Context.CurrentPackCode != "") {
                     runner.Context.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runner.Context, runner.Context.CurrentPackCode));
@@ -107,7 +107,7 @@ namespace FlowRunner.Engine
         //すでに同Codeのランナーがあった場合は上書きする
         public IRunner CreateAndSetRunner(string runnerCode, string packCode, string entryLabel) {
             Runner runner = new Runner();
-            runner.RunnerSetup(new RunnerCore(), LabelRunOrdertaker, new RunningContext());
+            runner.RunnerSetup(new LabelRun(), LabelRunOrdertaker, new RunningContext());
 
             //PackCodeが指定されていないときはランナーを非アクティブで作成する
             if (packCode == "") {
@@ -178,7 +178,7 @@ namespace FlowRunner.Engine
 
             for (int count = 0; count < 500; count++) {
                 if (!runner.Active || runner.Context.IsHalting || runner.FrameSleep || runner.Deleted) return;
-                runner.RunnerCore.ShotRun(runner.Context);
+                runner.LabelRun.ShotRun(runner.Context);
             }
         }
 
@@ -218,14 +218,14 @@ namespace FlowRunner.Engine
         }
 
         public RunningContext Context;
-        public RunnerCore RunnerCore = new RunnerCore();
+        public LabelRun LabelRun = new LabelRun();
 
         ILabelRunOrdertaker LabelRunOrdertaker {
-            get => RunnerCore.LabelRunOrdertaker;
+            get => LabelRun.LabelRunOrdertaker;
         }
-        public void RunnerSetup(RunnerCore runnerCore, ILabelRunOrdertaker labelRunOrdertaker, RunningContext context) {
-            RunnerCore = runnerCore;
-            RunnerCore.LabelRunOrdertaker = labelRunOrdertaker;
+        public void RunnerSetup(LabelRun labelRun, ILabelRunOrdertaker labelRunOrdertaker, RunningContext context) {
+            LabelRun = labelRun;
+            LabelRun.LabelRunOrdertaker = labelRunOrdertaker;
             Context = context;
             Context.SetRunner(this);
         }
@@ -235,7 +235,7 @@ namespace FlowRunner.Engine
             Pack pack = LabelRunOrdertaker.GetPack(Context, packCode);
             Context.SetLabelsAndStatements(pack);
             //
-            Context.ProgramCounter = RunnerCore.GetStatementIndex_LabelResolution(Context, packCode, entryLabel);
+            Context.ProgramCounter = LabelRun.GetStatementIndex_LabelResolution(Context, packCode, entryLabel);
             Context.IsHalting = false;
         }
 
