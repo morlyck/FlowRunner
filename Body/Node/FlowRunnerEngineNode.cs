@@ -101,7 +101,7 @@ namespace FlowRunner
 
 namespace FlowRunner.Engine
 {
-    public interface NodeCnpn_fromEngine
+    public interface INodeCnpn_fromEngine
     {
         void Update();
     }

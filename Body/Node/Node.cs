@@ -14,7 +14,7 @@ using FlowRunner.Another;
 namespace FlowRunner.Engine
 {
 
-    public interface INode : ILabelRunOrdertaker, NodeCnpn_fromEngine
+    public interface INode : ILabelRunOrdertaker, INodeCnpn_fromEngine
     {
         string Path { get; }
 
