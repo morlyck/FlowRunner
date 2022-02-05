@@ -26,6 +26,9 @@ namespace FlowRunner
         }
         
         void Initialization_Engine() {
+            //エンジンノードの追加
+            Node = new Engine.FlowRunnerEngineNode(this);
+
             //サイクルの初期化
             Initialization_FlowRunnerCycle();
 
