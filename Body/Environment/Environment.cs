@@ -13,5 +13,20 @@ namespace FlowRunner.Engine
 {
     public class Environment
     {
+        Dictionary<string, string> variables = new Dictionary<string, string>();
+        public string GetValue(string variableName) {
+            if (!variables.ContainsKey(variableName)) return null;
+
+            return variables[variableName];
+        }
+        public string SetValue(string variableName, string value) {
+            if (!variables.ContainsKey(variableName)) {
+                variables.Add(variableName, value);
+            } else {
+                variables[variableName] = value;
+            }
+
+            return value;
+        }
     }
 }
