@@ -86,6 +86,8 @@ namespace FlowRunner.Engine
             }
         }
         public void Up(List<string> returnValues) {
+            if (currentFloorNo == 0) throw new UpOnGlobalEnvironmentException("大域環境でアップ処理を行おうとした");
+
             int underFloorDataFrameNo = currentFloorNo;
             FloorDataFrame underFloorDataFrame = floorDataFrames[currentFloorNo];
             currentFloorNo--;
@@ -119,6 +121,10 @@ namespace FlowRunner.Engine
         //大域環境で引数引き込みを行おうとした場合
         public class PullArgumentsOnGlobalEnvironmentException : Exception { 
             public PullArgumentsOnGlobalEnvironmentException(string text) :base(text){ }
+        }
+        //大域環境でアップ処理を行おうとした場合
+        public class UpOnGlobalEnvironmentException : Exception { 
+            public UpOnGlobalEnvironmentException(string text) :base(text){ }
         }
 
     }
