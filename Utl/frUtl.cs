@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace FlowRunner.Utl
 {
-    internal static class frUtl
+    public static class frUtl
     {
         public static void InvokeActionAll<typ>(this object target, object arg) {
             foreach (MethodInfo info in target.GetType().GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) {
@@ -46,7 +46,17 @@ namespace FlowRunner.Utl
         
 
 
-
     }
 
+    public static class PrivateAccessEx
+    {
+        public static typ GetField<typ>(this object target, string fieldName) {
+            Type targetType = target.GetType();
+            var field = targetType.GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic); ;
+
+            dynamic dynamic = field.GetValue(target);
+
+            return dynamic;
+        }
+    }
 }
