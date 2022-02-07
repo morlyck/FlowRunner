@@ -54,7 +54,7 @@ namespace FlowRunner.Engine
         bool setValue(string variableName, string value, int floorNo) {
             int nowFloorNo = floorNo - 1;
 
-            //大局環境までに該当の変数がなかったらfalseを返す
+            //大域環境までに該当の変数がなかったらfalseを返す
             if (nowFloorNo < 0) return false;
 
             //該当する変数がある場合は値を更新する
