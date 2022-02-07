@@ -58,5 +58,12 @@ namespace FlowRunner.Utl
 
             return dynamic;
         }
+        public static void SetField(this object target, string fieldName, object value) {
+            Type targetType = target.GetType();
+            var field = targetType.GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic); ;
+
+            field.SetValue(target, value);
+
+        }
     }
 }
