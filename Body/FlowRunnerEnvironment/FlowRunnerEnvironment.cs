@@ -81,8 +81,8 @@ namespace FlowRunner.Engine
         public void PullArguments(List<string> variables) {
             if (currentFloorNo == 0) throw new Exception("大域環境で引数引き込みを行おうとした");
 
-            foreach(string variable in variables) {
-                SetValue(variable, getValue(variable, currentFloorNo));
+            for (int count = 0; count < variables.Count; count++) {
+                SetValue(variables[count], getValue(currentFloor.Arguments[count], currentFloorNo));
             }
         }
         public void Up(List<string> returnValues) {
