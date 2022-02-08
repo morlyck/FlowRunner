@@ -11,14 +11,14 @@ using FlowRunner.Engine;
 
 namespace FlowRunner.Engine
 {
-    public class FlowRunnerEnvironment
+    public class ChainEnvironment
     {
         List<FloorDataFrame> floorDataFrames = new List<FloorDataFrame> { new FloorDataFrame() };
 
         int currentFloorNo = 0;
         FloorDataFrame currentFloor = null;
 
-        public FlowRunnerEnvironment() {
+        public ChainEnvironment() {
             currentFloor = floorDataFrames[currentFloorNo];
         }
 
