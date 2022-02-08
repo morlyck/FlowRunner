@@ -94,7 +94,7 @@ namespace FlowRunner.Engine
             currentFloor = floorDataFrames[currentFloorNo];
 
             for(int count = 0; count < underFloorDataFrame.ReturnValues.Count; count++) {
-                SetValue(underFloorDataFrame.ReturnValues[count], getValue(returnValues[count], underFloorDataFrameNo));
+                SetValue(underFloorDataFrame.ReturnValues[count], getValue(returnValues[count], underFloorDataFrameNo + 1));
             }
 
             floorDataFrames.Remove(underFloorDataFrame);
