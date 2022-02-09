@@ -22,6 +22,10 @@ namespace FlowRunner.Engine
 
         bool FrameSleep { get; set; }
         bool Deleted { get; set; }
+
+        bool RunHalted { get; set; }
+        void HaltRun();
+
     }
 
     public class RunnerSdReady
@@ -43,7 +47,15 @@ namespace FlowRunner.Engine
 
             return sdReady;
         }
+        //---
 
+        public bool RunHalted { get=>Context.IsHalting; set=> Context.IsHalting = value; }
+        public void HaltRun() {
+            Context.IsHalting = true;
+        }
+
+
+        //---
         public RunningContext Context;
         public LabelRun LabelRun = new LabelRun();
 
