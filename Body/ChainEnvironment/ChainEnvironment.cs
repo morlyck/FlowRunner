@@ -66,6 +66,16 @@ namespace FlowRunner.Engine
             //該当する変数がない場合は上位階層に投げる
             return setValue(variableName, value, nowFloorNo);
         }
+        public string CreateOrSetValue_Local(string variableName, string value) {
+            //今の階層に変数を追加または値の更新をする
+            if (!currentFloor.Variables.ContainsKey(variableName)) {
+                currentFloor.Variables.Add(variableName, value);
+            } else {
+                currentFloor.Variables[variableName] = value;
+            }
+
+            return value;
+        }
 
         public void Down(List<string> returnValues, List<string> arguments) {
             FloorDataFrame underFloorDataFrame = new FloorDataFrame();
