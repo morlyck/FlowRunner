@@ -14,14 +14,14 @@ namespace FlowRunner
 {
     public static class ICreateOrGetEx
     {
-        public static INode CreateOrGetNode<typ>(this FlowRunnerEngine engine, out bool createSwitch, string path)
+        public static typ CreateOrGetNode<typ>(this FlowRunnerEngine engine, out bool createSwitch, string path)
             where typ : CustomNode {
             createSwitch = !engine.ExistsNode(path);
 
             if (createSwitch) {
                 return engine.CreateAndSetNode<typ>(path);
             } else {
-                return engine.GetNode(path);
+                return engine.GetNode(path) as typ;
             }
         }
         public static IRunner? CreateOrGetRunner(this INode node, bool createSwitch) {
