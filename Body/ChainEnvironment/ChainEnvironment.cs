@@ -13,7 +13,7 @@ namespace FlowRunner.Engine
 {
     public class ChainEnvironmentSdReady : NodeSdReadyCommon
     {
-        public List<ChainEnvironment.FloorDataFrame> floorDataFrames = new List<ChainEnvironment.FloorDataFrame> { new ChainEnvironment.FloorDataFrame() };
+        public List<ChainEnvironment.FloorDataFrame> floorDataFrames = null;
 
         public int currentFloorNo = 0;
     }
@@ -39,12 +39,14 @@ namespace FlowRunner.Engine
         }
 
         //---
-        List<FloorDataFrame> floorDataFrames = new List<FloorDataFrame> { new FloorDataFrame() };
+        List<FloorDataFrame> floorDataFrames = null;
 
         int currentFloorNo = 0;
         FloorDataFrame currentFloor = null;
 
         public ChainEnvironment() {
+            currentFloorNo = 0;
+            floorDataFrames = new List<FloorDataFrame> { new FloorDataFrame() };
             currentFloor = floorDataFrames[currentFloorNo];
         }
 
