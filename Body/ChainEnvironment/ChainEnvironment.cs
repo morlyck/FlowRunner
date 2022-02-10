@@ -102,6 +102,20 @@ namespace FlowRunner.Engine
 
             return value;
         }
+        public bool ExistsValue(string variableName) {
+            if (currentFloor.Variables.ContainsKey(variableName)) return true;
+
+            return existsValue(variableName, currentFloorNo);
+        }
+
+        bool existsValue(string variableName, int floorNo) {
+            int nowFloorNo = floorNo - 1;
+
+            if (nowFloorNo < 0) return false;
+            if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) return true;
+
+            return existsValue(variableName, nowFloorNo);
+        }
 
         public void Down(List<string> returnValues, List<string> arguments) {
             FloorDataFrame underFloorDataFrame = new FloorDataFrame();

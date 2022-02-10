@@ -26,6 +26,7 @@ namespace FlowRunner.Engine
         bool RunHalted { get; set; }
         void HaltRun();
 
+        RunningContext Context { get; set; }
         public ChainEnvironment ChainEnvironment { get; set; }
 
     }
@@ -71,11 +72,11 @@ namespace FlowRunner.Engine
         public void HaltRun() {
             Context.IsHalting = true;
         }
-        public ChainEnvironment ChainEnvironment { get; set; }
+        public ChainEnvironment ChainEnvironment { get; set; } = new ChainEnvironment();
 
 
         //---
-        public RunningContext Context;
+        public RunningContext Context { get; set; }
         public LabelRun LabelRun = new LabelRun();
 
         ILabelRunOrdertaker LabelRunOrdertaker {
