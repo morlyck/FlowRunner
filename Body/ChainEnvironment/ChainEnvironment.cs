@@ -11,8 +11,34 @@ using FlowRunner.Engine;
 
 namespace FlowRunner.Engine
 {
+    public class ChainEnvironmentSdReady : NodeSdReadyCommon
+    {
+        public List<ChainEnvironment.FloorDataFrame> floorDataFrames = new List<ChainEnvironment.FloorDataFrame> { new ChainEnvironment.FloorDataFrame() };
+
+        public int currentFloorNo = 0;
+    }
     public class ChainEnvironment
     {
+        //シリアライズ対応
+        public string Serialize(FlowRunnerEngine engine) {
+            ChainEnvironmentSdReady sdReady = new ChainEnvironmentSdReady();
+            sdReady.floorDataFrames = floorDataFrames;
+            sdReady.currentFloorNo = currentFloorNo;
+
+            return engine.Infra.GeneralSd.Serialize(sdReady);
+        }
+
+        //デシリアライズ対応
+        public void Deserialize(FlowRunnerEngine engine, string text) {
+            ChainEnvironmentSdReady sdReady = engine.Infra.GeneralSd.Deserialize<ChainEnvironmentSdReady>(text);
+
+            floorDataFrames = sdReady.floorDataFrames;
+            currentFloorNo = sdReady.currentFloorNo;
+
+            currentFloor = floorDataFrames[currentFloorNo];
+        }
+
+        //---
         List<FloorDataFrame> floorDataFrames = new List<FloorDataFrame> { new FloorDataFrame() };
 
         int currentFloorNo = 0;
