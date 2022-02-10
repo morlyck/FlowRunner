@@ -38,14 +38,24 @@ namespace FlowRunner.Engine
 
     public class Runner : RunnerSdReady, IRunner
     {
-        public RunnerSdReady GetSdReady() {
+        //シリアライズ対応
+        public string Serialize(FlowRunnerEngine engine) {
             RunnerSdReady sdReady = new RunnerSdReady();
 
             sdReady.Active = Active;
             sdReady.FrameSleep = FrameSleep;
             sdReady.Deleted = Deleted;
 
-            return sdReady;
+            return engine.Infra.GeneralSd.Serialize(sdReady);
+        }
+
+        //デシリアライズ対応
+        public void Deserialize(FlowRunnerEngine engine, string text) {
+            RunnerSdReady sdReady = engine.Infra.GeneralSd.Deserialize<RunnerSdReady>(text);
+
+            Active = sdReady.Active;
+            FrameSleep = sdReady.FrameSleep;
+            Deleted = sdReady.Deleted;
         }
         //---
 

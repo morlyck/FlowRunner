@@ -62,18 +62,19 @@ namespace FlowRunner.Engine
         protected void NodeSerializerDelta(FlowRunnerEngine engine,ref NodeSdReadyCommon sdReady) {
             foreach (KeyValuePair<string, Runner> runner in runners) {
                 sdReady.RunnerCodes.Add(runner.Key);
-                sdReady.RunnerTexts.Add(engine.Infra.GeneralSd.Serialize(runner.Value.GetSdReady()));
+                sdReady.RunnerTexts.Add(runner.Value.Serialize(engine));
                 sdReady.Contexts.Add(Operation.RunningContextSdOperation.Serialize(runner.Value.Context, engine.Infra));
             }
             foreach (Runner runner in anonymousRunners) {
-                sdReady.AnonymousRunnerTexts.Add(engine.Infra.GeneralSd.Serialize(runner.GetSdReady()));
+                sdReady.AnonymousRunnerTexts.Add(runner.Serialize(engine));
                 sdReady.AnonymousContexts.Add(Operation.RunningContextSdOperation.Serialize(runner.Context, engine.Infra));
             }
 
         }
         protected void NodeDeserializeDelta(FlowRunnerEngine engine, ref NodeSdReadyCommon sdReady) {
             for (int index = 0; index < sdReady.RunnerCodes.Count; index++) {
-                Runner runner = engine.Infra.GeneralSd.Deserialize<Runner>(sdReady.RunnerTexts[index]);
+                Runner runner = new Runner(); 
+                runner.Deserialize(engine, sdReady.RunnerTexts[index]);
                 runner.RunnerSetup(new LabelRun(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.Contexts[index], engine.Infra));
 
                 if (runner.Context.CurrentPackCode != "") {
@@ -83,7 +84,8 @@ namespace FlowRunner.Engine
                 runners.Add(sdReady.RunnerCodes[index], runner);
             }
             for (int index = 0; index < sdReady.AnonymousRunnerTexts.Count; index++) {
-                Runner runner = engine.Infra.GeneralSd.Deserialize<Runner>(sdReady.AnonymousRunnerTexts[index]);
+                Runner runner = new Runner();
+                runner.Deserialize(engine, sdReady.AnonymousRunnerTexts[index]);
                 runner.RunnerSetup(new LabelRun(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.AnonymousContexts[index], engine.Infra));
 
                 if (runner.Context.CurrentPackCode != "") {
