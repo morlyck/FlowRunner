@@ -26,6 +26,8 @@ namespace FlowRunner.Engine
         bool RunHalted { get; set; }
         void HaltRun();
 
+        public ChainEnvironment ChainEnvironment { get; set; }
+
     }
 
     public class RunnerSdReady
@@ -34,6 +36,7 @@ namespace FlowRunner.Engine
         public bool FrameSleep { get; set; } = false;
         public bool Deleted { get; set; } = false;
 
+        public string ChainEnvironmentText = "";
     }
 
     public class Runner : RunnerSdReady, IRunner
@@ -45,6 +48,8 @@ namespace FlowRunner.Engine
             sdReady.Active = Active;
             sdReady.FrameSleep = FrameSleep;
             sdReady.Deleted = Deleted;
+            //
+            sdReady.ChainEnvironmentText = ChainEnvironment.Serialize(engine);
 
             return engine.Infra.GeneralSd.Serialize(sdReady);
         }
@@ -56,6 +61,9 @@ namespace FlowRunner.Engine
             Active = sdReady.Active;
             FrameSleep = sdReady.FrameSleep;
             Deleted = sdReady.Deleted;
+            //
+            ChainEnvironment = new ChainEnvironment();
+            ChainEnvironment.Deserialize(engine, sdReady.ChainEnvironmentText);
         }
         //---
 
@@ -63,6 +71,7 @@ namespace FlowRunner.Engine
         public void HaltRun() {
             Context.IsHalting = true;
         }
+        public ChainEnvironment ChainEnvironment { get; set; }
 
 
         //---
