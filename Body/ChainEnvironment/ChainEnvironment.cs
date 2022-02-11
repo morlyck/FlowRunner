@@ -11,6 +11,12 @@ using FlowRunner.Engine;
 
 namespace FlowRunner.Engine
 {
+    public interface IChainEnvironmentOrdertaker
+    {
+        //イベントの発火
+        void IgnitionGetValueEvent(string variableName, string value);
+        void IgnitionSetValueEvent(string variableName, string value);
+    }
     public class ChainEnvironmentSdReady : NodeSdReadyCommon
     {
         public List<ChainEnvironment.FloorDataFrame> floorDataFrames = null;
@@ -19,6 +25,7 @@ namespace FlowRunner.Engine
     }
     public class ChainEnvironment
     {
+        public IChainEnvironmentOrdertaker? Ordertaker = null;
         //シリアライズ対応
         public string Serialize(FlowRunnerEngine engine) {
             ChainEnvironmentSdReady sdReady = new ChainEnvironmentSdReady();
@@ -51,6 +58,12 @@ namespace FlowRunner.Engine
         }
 
         public string GetValue(string variableName) {
+            var returnValue = _GetValue(variableName);
+            //イベント発火
+            Ordertaker?.IgnitionGetValueEvent(variableName, returnValue);
+            return returnValue;
+        }
+        string _GetValue(string variableName) {
             if (currentFloor.Variables.ContainsKey(variableName)) return currentFloor.Variables[variableName];
 
             return getValue(variableName, currentFloorNo);
@@ -65,6 +78,13 @@ namespace FlowRunner.Engine
             return getValue(variableName, nowFloorNo);
         }
         public string SetValue(string variableName, string value) {
+            _SetValue(variableName,value);
+            //イベント発火
+            Ordertaker?.IgnitionSetValueEvent(variableName, value);
+
+            return value;
+        }
+        string _SetValue(string variableName, string value) {
             //今の階層にすでに変数がある場合は値を更新する
             if (currentFloor.Variables.ContainsKey(variableName)) {
                 currentFloor.Variables[variableName] = value;
@@ -95,6 +115,13 @@ namespace FlowRunner.Engine
             return setValue(variableName, value, nowFloorNo);
         }
         public string CreateOrSetValue_Local(string variableName, string value) {
+            _CreateOrSetValue_Local(variableName, value);
+            //イベント発火
+            Ordertaker?.IgnitionSetValueEvent(variableName, value);
+
+            return value;
+        }
+        string _CreateOrSetValue_Local(string variableName, string value) {
             //今の階層に変数を追加または値の更新をする
             if (!currentFloor.Variables.ContainsKey(variableName)) {
                 currentFloor.Variables.Add(variableName, value);
