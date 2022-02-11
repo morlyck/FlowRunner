@@ -30,6 +30,10 @@ namespace FlowRunner.Engine
         public ChainEnvironment ChainEnvironment { get; set; }
 
     }
+    public interface IRunnerEngineInside
+    {
+        void StartCycleTime();
+    }
 
     public class RunnerSdReady
     {
@@ -40,7 +44,7 @@ namespace FlowRunner.Engine
         public string ChainEnvironmentText = "";
     }
 
-    public class Runner : RunnerSdReady, IRunner
+    public class Runner : RunnerSdReady, IRunner, IRunnerEngineInside
     {
         //シリアライズ対応
         public string Serialize(FlowRunnerEngine engine) {
@@ -109,6 +113,23 @@ namespace FlowRunner.Engine
             Active = true;
             return this;
         }
+
+
+        //---
+
+        void IRunnerEngineInside.StartCycleTime() {
+            ChainEnvironment.Ordertaker = VariableEventSubject;
+            VariableEventSubject.StartCycleTime(ChainEnvironment);
+        }
+
+
+
+
+
+
+
+
+
     }
 
 }

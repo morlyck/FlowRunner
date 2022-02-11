@@ -104,6 +104,7 @@ namespace FlowRunner.Engine
     public interface INodeCnpn_fromEngine
     {
         void Update();
+        void StartCycleTime();
     }
 
     public class FlowRunnerEngineNode : NodeCommon, INode
@@ -209,6 +210,14 @@ namespace FlowRunner.Engine
                 keyValuePair.Value.Update();
             }
             this.Update();
+        }
+
+        //起動
+        public void StartCycleTimeAll() {
+            foreach (KeyValuePair<string, INode> keyValuePair in nodes) {
+                keyValuePair.Value.StartCycleTime();
+            }
+            this.StartCycleTime();
         }
 
         //--

@@ -184,6 +184,11 @@ namespace FlowRunner.Engine
             }
         }
 
+        public void StartCycleTime() {
+            RunnerAll(runner => {
+                (runner as IRunnerEngineInside).StartCycleTime();
+            });
+        }
 
 
     }
