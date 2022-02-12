@@ -77,20 +77,12 @@ namespace FlowRunner.Engine
                 runner.Deserialize(engine, sdReady.RunnerTexts[index]);
                 runner.RunnerSetup(new LabelRun(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.Contexts[index], engine.Infra));
 
-                if (runner.Context.CurrentPackCode != "") {
-                    runner.Context.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runner.Context, runner.Context.CurrentPackCode));
-                }
-
                 runners.Add(sdReady.RunnerCodes[index], runner);
             }
             for (int index = 0; index < sdReady.AnonymousRunnerTexts.Count; index++) {
                 Runner runner = new Runner();
                 runner.Deserialize(engine, sdReady.AnonymousRunnerTexts[index]);
                 runner.RunnerSetup(new LabelRun(), LabelRunOrdertaker, Operation.RunningContextSdOperation.Deserialize(sdReady.AnonymousContexts[index], engine.Infra));
-
-                if (runner.Context.CurrentPackCode != "") {
-                    runner.Context.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(runner.Context, runner.Context.CurrentPackCode));
-                }
 
                 anonymousRunners.Add(runner);
             }

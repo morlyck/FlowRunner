@@ -121,6 +121,13 @@ namespace FlowRunner.Engine
 
         void IRunnerEngineInside.StartCycleTime() {
             ChainEnvironment.Ordertaker = VariableEventSubject;
+            
+            //ランニングコンテキストのキャッシュの更新
+            if (Context.CurrentPackCode != "") {
+                Context.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(Context, Context.CurrentPackCode));
+            }
+
+            //スタート時実行機能の呼び出し用
             VariableEventSubject.StartCycleTime(ChainEnvironment);
         }
 
