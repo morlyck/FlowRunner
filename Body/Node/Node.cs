@@ -90,7 +90,23 @@ namespace FlowRunner.Engine
         public virtual (bool, CommandExecutionContext) Localize_Evaluation_ArgumentExpansion(IRunner runner, string commandSymbol, string packCode, string label, string expansionArgumentText) {
             return (false, null);
         }
+
+        Dictionary<string, Action<IRunningContext, CommandExecutionContext>> commands = new Dictionary<string, Action<IRunningContext, CommandExecutionContext>>();
+        public void AddCommand(string commandSymbol, Action<IRunningContext, CommandExecutionContext> action) {
+            if (!commands.ContainsKey(commandSymbol)) {
+                commands.Add(commandSymbol, action);
+            } else {
+                commands[commandSymbol] = action;
+            }
+        }
         public bool ExecutionExpansionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext) {
+            //コマンドリストに登録されているなら実行する
+            if (commands.ContainsKey(commandSymbol)) {
+                commands[commandSymbol].Invoke(runningContext, commandExecutionContext);
+                return true;
+            }
+
+            //ノードオペレーションリレーを使用してコマンドの実行を試みる
             var returnValue = Localize_ExecutionExpansionCommand(runningContext.Runner, commandSymbol, commandExecutionContext);
             if (returnValue) return true;
 
