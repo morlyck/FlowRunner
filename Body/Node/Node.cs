@@ -45,7 +45,7 @@ namespace FlowRunner.Engine
             Root = root;
             Path = path;
 
-            this.InvokeActionAll<ConstructorAttribute>();
+            this.InvokeActionAll<CustomNode, ConstructorAttribute>();
         }
         protected override ILabelRunOrdertaker LabelRunOrdertaker { get => this; }
         public FlowRunnerEngine Engine { get => Root.Engine; }
