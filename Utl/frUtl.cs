@@ -66,4 +66,7 @@ namespace FlowRunner.Utl
 
         }
     }
+
+
+    public class ConstructorAttribute : Attribute { }
 }
