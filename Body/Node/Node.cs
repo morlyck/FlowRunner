@@ -107,8 +107,8 @@ namespace FlowRunner.Engine
         }
 
         //
-        Dictionary<string, Action<IRunningContext, CommandExecutionContext>> commands = new Dictionary<string, Action<IRunningContext, CommandExecutionContext>>();
-        public void AddCommand(string commandSymbol, Action<IRunningContext, CommandExecutionContext> action) {
+        Dictionary<string, Action<IRunner, CommandExecutionContext>> commands = new Dictionary<string, Action<IRunner, CommandExecutionContext>>();
+        public void AddCommand(string commandSymbol, Action<IRunner, CommandExecutionContext> action) {
             if (!commands.ContainsKey(commandSymbol)) {
                 commands.Add(commandSymbol, action);
             } else {
@@ -122,7 +122,7 @@ namespace FlowRunner.Engine
         public bool ExecutionExpansionCommand(IRunningContext runningContext, string commandSymbol, CommandExecutionContext commandExecutionContext) {
             //コマンドリストに登録されているなら実行する
             if (commands.ContainsKey(commandSymbol)) {
-                commands[commandSymbol].Invoke(runningContext, commandExecutionContext);
+                commands[commandSymbol].Invoke(runningContext.Runner, commandExecutionContext);
                 return true;
             }
 
