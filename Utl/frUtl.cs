@@ -21,6 +21,12 @@ namespace FlowRunner.Utl
                 info.Invoke(target, null);
             }
         }
+        public static void InvokeActionAll<targetType, typ>(this object target) {
+            foreach (MethodInfo info in typeof(targetType).GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) {
+                if (info.GetCustomAttributes(typeof(typ), true).Length == 0) continue;
+                info.Invoke(target, null);
+            }
+        }
         public static void InvokeActionAll_Order<typ>(this object target, Func<typ, int> func)
             where typ : Attribute {
             Dictionary<int, Action> actions = new Dictionary<int, Action>();
