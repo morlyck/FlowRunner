@@ -77,7 +77,7 @@ namespace FlowRunner.Engine
 
             return NodeOperationRelay(Path).GetPack(runningContext, packCode);
         }
-        public virtual (bool, Pack) Localize_GetPack(IRunner runner, string packCode) {
+        protected virtual (bool, Pack) Localize_GetPack(IRunner runner, string packCode) {
             return (false, null);
         }
 
@@ -87,8 +87,8 @@ namespace FlowRunner.Engine
 
             return NodeOperationRelay(Path).Evaluation_ArgumentExpansion(runningContext, commandSymbol, packCode, label, expansionArgumentText);
         }
-        public virtual (bool, CommandExecutionContext) Localize_Evaluation_ArgumentExpansion(IRunner runner, string commandSymbol, string packCode, string label, string expansionArgumentText) {
             return (false, null);
+        protected virtual (bool, CommandExecutionContext) Localize_Evaluation_ArgumentExpansion(IRunner runner, string commandSymbol, string packCode, string label, string expansionArgumentText) {
         }
 
         Dictionary<string, Action<IRunningContext, CommandExecutionContext>> commands = new Dictionary<string, Action<IRunningContext, CommandExecutionContext>>();
@@ -113,7 +113,7 @@ namespace FlowRunner.Engine
             return NodeOperationRelay(Path).ExecutionExpansionCommand(runningContext, commandSymbol, commandExecutionContext);
         }
 
-        public virtual bool Localize_ExecutionExpansionCommand(IRunner runner, string commandSymbol, CommandExecutionContext commandExecutionContext) {
+        protected virtual bool Localize_ExecutionExpansionCommand(IRunner runner, string commandSymbol, CommandExecutionContext commandExecutionContext) {
             return false;
         }
 
@@ -124,7 +124,7 @@ namespace FlowRunner.Engine
             return NodeOperationRelay(Path).CatchException_InvalidCommand(runningContext, e);
         }
 
-        public virtual bool Localize_CatchException_InvalidCommand(IRunner runner, InvalidCommandException e) {
+        protected virtual bool Localize_CatchException_InvalidCommand(IRunner runner, InvalidCommandException e) {
             return false;
         }
 
@@ -134,7 +134,7 @@ namespace FlowRunner.Engine
 
             return NodeOperationRelay(Path).CatchException_LabelResolutionMiss(runningContext, e);
         }
-        public virtual bool Localize_CatchException_LabelResolutionMiss(IRunner runner, LabelResolutionMissException e) {
+        protected virtual bool Localize_CatchException_LabelResolutionMiss(IRunner runner, LabelResolutionMissException e) {
             return false;
         }
 
@@ -144,7 +144,7 @@ namespace FlowRunner.Engine
 
             return NodeOperationRelay(Path).CatchException_ProgramCounterOutOfRange(runningContext, e);
         }
-        public virtual bool Localize_CatchException_ProgramCounterOutOfRange(IRunner runner, ProgramCounterOutOfRangeException e) {
+        protected virtual bool Localize_CatchException_ProgramCounterOutOfRange(IRunner runner, ProgramCounterOutOfRangeException e) {
             return false;
         }
 
@@ -182,7 +182,7 @@ namespace FlowRunner.Engine
             }
 
         }
-        public virtual (bool, CustomNodeSdReady) Localize_Serialize(bool beforeSwitch, CustomNodeSdReady sdReady) {
+        protected virtual (bool, CustomNodeSdReady) Localize_Serialize(bool beforeSwitch, CustomNodeSdReady sdReady) {
             return (false, null);
         }
 
@@ -211,7 +211,7 @@ namespace FlowRunner.Engine
             if (returnValue.Item1) Localize_Deserialize(false, (sdReady as CustomNodeSdReady), engine, text);
         }
 
-        public virtual (bool, CustomNodeSdReady) Localize_Deserialize(bool beforeSwitch, CustomNodeSdReady sdReady, FlowRunnerEngine engine, string text) {
+        protected virtual (bool, CustomNodeSdReady) Localize_Deserialize(bool beforeSwitch, CustomNodeSdReady sdReady, FlowRunnerEngine engine, string text) {
             return (false, null);
         }
 
