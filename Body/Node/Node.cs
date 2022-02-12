@@ -10,6 +10,7 @@ using FlowRunner;
 using FlowRunner.Engine;
 using FlowRunner.Another;
 
+using FlowRunner.Utl;
 
 namespace FlowRunner.Engine
 {
@@ -43,6 +44,8 @@ namespace FlowRunner.Engine
         public CustomNode(INode root, string path) {
             Root = root;
             Path = path;
+
+            this.InvokeActionAll<ConstructorAttribute>();
         }
         protected override ILabelRunOrdertaker LabelRunOrdertaker { get => this; }
         public FlowRunnerEngine Engine { get => Root.Engine; }
