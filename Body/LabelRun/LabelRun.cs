@@ -215,6 +215,12 @@ namespace FlowRunner.Engine
                     case "return":
                         commandExecutionContext.ReturnFlag = true;
                         break;
+                    case "int":
+                        InterruptInfo interruptInfo = new InterruptInfo();
+                        interruptInfo.PackCode = commandExecutionContext.JumpPackCode;
+                        interruptInfo.Label = commandExecutionContext.JumpLabel;
+                        runningContext.InterruptInfos.Add(interruptInfo);
+                        break;
                 }
             }
 
