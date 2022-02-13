@@ -58,6 +58,9 @@ namespace FlowRunner.Engine
         BuildinCommandExecutionContext BuildinCommandExecutionContext { get; }
 
         void SetLabelsAndStatements(Pack pack);
+
+        //割り込み情報
+        List<InterruptInfo> InterruptInfos { get; set; }
     }
     public interface ILabelRunOrdertaker
     {
@@ -96,6 +99,29 @@ namespace FlowRunner.Engine
 
                 //ステートメントの取得
                 Statement statement = runningContext.Statements[runningContext.ProgramCounter];
+
+                //割り込み対応
+                if(runningContext.InterruptInfos.Count != 0) {
+                    InterruptInfo info = runningContext.InterruptInfos[0];
+
+                    //割り込みからの復帰にリターンを使うためPCを一つ減算しておく
+                    runningContext.ProgramCounter--;
+
+                    CommandExecutionContext interrup_CommandExecutionContext = runningContext.BuildinCommandExecutionContext;
+                    interrup_CommandExecutionContext.JumpPackCode = info.PackCode;
+                    interrup_CommandExecutionContext.JumpLabel = info.Label;
+
+                    //フラグの設定
+                    interrup_CommandExecutionContext.ReturnFlag = false;
+                    interrup_CommandExecutionContext.PushFlag = true;//減算した状態でスタックに積む
+                    interrup_CommandExecutionContext.JumpFlag = true;//割り込みで指定されたところにジャンプする
+                    UpdateContext(runningContext, interrup_CommandExecutionContext);
+
+                    runningContext.InterruptInfos.RemoveAt(0);
+
+                    ShotRun(runningContext);
+                    return;
+                }
 
                 //引数の評価
                 CommandExecutionContext commandExecutionContext = null;
@@ -192,7 +218,11 @@ namespace FlowRunner.Engine
                 }
             }
 
+            UpdateContext(runningContext, commandExecutionContext);
 
+        }
+        
+        void UpdateContext(IRunningContext runningContext, CommandExecutionContext commandExecutionContext) {
             //PackCodeとPCの更新を行います
 
             //現在のPackCodeとPCをコールスタックに積みます
@@ -255,6 +285,13 @@ namespace FlowRunner.Engine
 
     public class BuildinCommandExecutionContext : CommandExecutionContext
     { }
+
+    //割り込み情報
+    public class InterruptInfo
+    {
+        public string PackCode = "";
+        public string Label = "";
+    }
 
 
     //例外

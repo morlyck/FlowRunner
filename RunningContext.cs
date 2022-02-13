@@ -15,6 +15,9 @@ namespace FlowRunner.Engine
         public int ProgramCounter { get; set; } = 0;
         public string CurrentPackCode { get; set; } = "";
         public Stack<StackFrame> CallStack { get; set; } = new Stack<StackFrame>();
+        
+        //割り込み情報
+        public List<InterruptInfo> InterruptInfos { get; set; } = new List<InterruptInfo>();
     }
     public partial class RunningContext : RunningContextSdReady,
    IRunningContext
@@ -25,6 +28,7 @@ namespace FlowRunner.Engine
             sdReady.ProgramCounter = ProgramCounter;
             sdReady.CurrentPackCode = CurrentPackCode;
             sdReady.CallStack = CallStack;
+            sdReady.InterruptInfos = InterruptInfos;
 
             return sdReady;
         }
