@@ -200,21 +200,27 @@ namespace FlowRunner.Engine
                         break;
 
                     //以下ビルドインコマンド
+                    //ノーオペレーション命令
                     case "nop":
                         break;
+                    //停止命令
                     case "halt":
                         runningContext.IsHalting = true;
                         break;
+                    //ジャンプ命令
                     case "jump":
                         commandExecutionContext.JumpFlag = true;
                         break;
+                    //呼び出し命令
                     case "call":
                         commandExecutionContext.PushFlag = true;
                         commandExecutionContext.JumpFlag = true;
                         break;
+                    //サブルーチンからの復帰命令
                     case "return":
                         commandExecutionContext.ReturnFlag = true;
                         break;
+                    //割り込み命令
                     case "int":
                         InterruptInfo interruptInfo = new InterruptInfo();
                         interruptInfo.PackCode = commandExecutionContext.JumpPackCode;
