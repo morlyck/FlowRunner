@@ -27,8 +27,8 @@ namespace FlowRunner.Engine
         void HaltRun();
 
         RunningContext Context { get; set; }
-        ChainEnvironment ChainEnvironment { get; set; }
-        VariableEventSubject VariableEventSubject { get; set; }
+        ChainEnvironment ChainEnvironment { get; }
+        VariableEventSubject VariableEventSubject { get; }
 
     }
     public interface IRunnerEngineInside
@@ -77,9 +77,9 @@ namespace FlowRunner.Engine
         public void HaltRun() {
             Context.IsHalting = true;
         }
-        public ChainEnvironment ChainEnvironment { get; set; } = new ChainEnvironment();
+        public ChainEnvironment ChainEnvironment { get; private set; } = new ChainEnvironment();
+        public VariableEventSubject VariableEventSubject { get; private set; } = new VariableEventSubject();
 
-        public VariableEventSubject VariableEventSubject { get; set; } = new VariableEventSubject();
 
         //---
         public RunningContext Context { get; set; }
