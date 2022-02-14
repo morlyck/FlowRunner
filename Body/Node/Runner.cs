@@ -30,6 +30,8 @@ namespace FlowRunner.Engine
         ChainEnvironment ChainEnvironment { get; }
         VariableEventSubject VariableEventSubject { get; }
 
+        InterruptController InterruptController { get; }
+
     }
     public interface IRunnerEngineInside
     {
@@ -43,6 +45,7 @@ namespace FlowRunner.Engine
         public bool Deleted { get; set; } = false;
 
         public string ChainEnvironmentText = "";
+        public string InterruptControllerText = "";
     }
 
     public class Runner : RunnerSdReady, IRunner, IRunnerEngineInside
@@ -56,6 +59,7 @@ namespace FlowRunner.Engine
             sdReady.Deleted = Deleted;
             //
             sdReady.ChainEnvironmentText = ChainEnvironment.Serialize(engine);
+            sdReady.InterruptControllerText = InterruptController.Serialize(engine);
 
             return engine.Infra.GeneralSd.Serialize(sdReady);
         }
@@ -70,6 +74,9 @@ namespace FlowRunner.Engine
             //
             ChainEnvironment = new ChainEnvironment();
             ChainEnvironment.Deserialize(engine, sdReady.ChainEnvironmentText);
+
+            InterruptController = new InterruptController();
+            InterruptController.Deserialize(engine, sdReady.InterruptControllerText);
         }
         //---
 
@@ -78,8 +85,10 @@ namespace FlowRunner.Engine
             Context.IsHalting = true;
         }
         public ChainEnvironment ChainEnvironment { get; private set; } = new ChainEnvironment();
+
         public VariableEventSubject VariableEventSubject { get; private set; } = new VariableEventSubject();
 
+        public InterruptController InterruptController { get; private set; } = new InterruptController();
 
         //---
         public RunningContext Context { get; set; }
@@ -126,6 +135,9 @@ namespace FlowRunner.Engine
             if (Context.CurrentPackCode != "") {
                 Context.SetLabelsAndStatements(LabelRunOrdertaker.GetPack(Context, Context.CurrentPackCode));
             }
+
+            //割り込みコントローラの初期化
+            InterruptController.RunningContext = Context;
 
             //スタート時実行機能の呼び出し用
             VariableEventSubject.StartCycleTime(ChainEnvironment);
