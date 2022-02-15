@@ -54,13 +54,14 @@ namespace FlowRunner.Engine
 
         Stack<StackFrame> CallStack { get; set; }
 
+        //割り込み情報
+        List<InterruptInfo> InterruptInfos { get; set; }
+
         //
         BuildinCommandExecutionContext BuildinCommandExecutionContext { get; }
 
         void SetLabelsAndStatements(Pack pack);
 
-        //割り込み情報
-        List<InterruptInfo> InterruptInfos { get; set; }
     }
     public interface ILabelRunOrdertaker
     {
