@@ -48,7 +48,7 @@ namespace FlowRunner.Engine
         public string InterruptControllerText = "";
     }
 
-    public class Runner : RunnerSdReady, IRunner, IRunnerEngineInside
+    public class Runner : IRunner, IRunnerEngineInside
     {
         //シリアライズ対応
         public string Serialize(FlowRunnerEngine engine) {
@@ -80,6 +80,9 @@ namespace FlowRunner.Engine
         }
         //---
 
+        public bool Active { get; set; } = false;
+        public bool FrameSleep { get; set; } = false;
+        public bool Deleted { get; set; } = false;
         public bool RunHalted { get=>Context.IsHalting; set=> Context.IsHalting = value; }
         public void HaltRun() {
             Context.IsHalting = true;
