@@ -38,6 +38,8 @@ namespace FlowRunner.Engine
         public bool ReturnFlag = false;
         public bool PushFlag = false;
         public bool JumpFlag = false;
+
+        public Action? AfterAction = null;
     }
 }
 
@@ -143,9 +145,13 @@ namespace FlowRunner.Engine
                 commandExecutionContext.ReturnFlag = false;
                 commandExecutionContext.PushFlag = false;
                 commandExecutionContext.JumpFlag = false;
+                commandExecutionContext.AfterAction = null;
 
                 //コマンドの実行
                 ExecutionCommand(runningContext, statement.CommandSymbol, commandExecutionContext);
+
+                //アフターアクション
+                commandExecutionContext.AfterAction?.Invoke();
 
             } catch (Null_LabelRunOrdertakerException e) {
                 //オーダーテイカーがセットされていない場合は無条件でリスロー
