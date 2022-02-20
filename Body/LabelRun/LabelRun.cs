@@ -230,7 +230,9 @@ namespace FlowRunner.Engine
                     //割り込み命令
                     case "int":
                         InterruptInfo interruptInfo = new InterruptInfo();
-                        interruptInfo.PackCode = commandExecutionContext.JumpPackCode;
+                        interruptInfo.PackCode = (commandExecutionContext.JumpPackCode != "") ? 
+                            commandExecutionContext.JumpPackCode : 
+                            runningContext.CurrentPackCode;
                         interruptInfo.Label = commandExecutionContext.JumpLabel;
                         runningContext.InterruptInfos.Add(interruptInfo);
                         break;
