@@ -64,9 +64,7 @@ namespace FlowRunner.Engine
             return returnValue;
         }
         string _GetValue(string variableName) {
-            if (currentFloor.Variables.ContainsKey(variableName)) return currentFloor.Variables[variableName];
-
-            return getValue(variableName, currentFloorNo);
+            return getValue(variableName, currentFloorNo + 1);
         }
 
         string getValue(string variableName, int floorNo) {
