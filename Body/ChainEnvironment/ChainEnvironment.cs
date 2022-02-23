@@ -46,6 +46,28 @@ namespace FlowRunner.Engine
         }
 
         //---
+        //上位環境
+        ChainEnvironment? upstairEnvironment = null;
+        int connectionFloorNo = 0;
+        bool looseConnection = false;
+        public void SetUpstairEnvironment_LooseConnection(ChainEnvironment upstairEnvironment) {
+            this.upstairEnvironment = upstairEnvironment;
+            looseConnection = true;
+        }
+        public void SetUpstairEnvironment(ChainEnvironment upstairEnvironment, int connectionFloorNo) {
+            this.upstairEnvironment = upstairEnvironment;
+            this.connectionFloorNo = connectionFloorNo;
+            looseConnection = false;
+        }
+        public void SetUpstairEnvironment_ConnectionToCurrentFloorNo(ChainEnvironment upstairEnvironment) {
+            this.upstairEnvironment = upstairEnvironment;
+            this.connectionFloorNo = upstairEnvironment.currentFloorNo;
+            looseConnection = false;
+        }
+        public void ClearUpstairEnvironmentSetting() {
+            upstairEnvironment = null;
+        }
+
         List<FloorDataFrame> floorDataFrames = null;
 
         int currentFloorNo = 0;
@@ -63,14 +85,29 @@ namespace FlowRunner.Engine
             Ordertaker?.IgnitionGetValueEvent(variableName, returnValue);
             return returnValue;
         }
-        string _GetValue(string variableName) {
-            return getValue(variableName, currentFloorNo + 1);
+        string _GetValue(string variableName, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
+            //フロアナンバーの決定
+            int floorNo;
+            if (!lowerboundAccess || _looseConnection) {
+                floorNo = currentFloorNo;
+            } else {
+                if (currentFloorNo < _connectionFloorNo) throw new MisalignedConnectionFloorNoException("指定されたコネクションフロアナンバーに該当する階層がない");
+                floorNo = _connectionFloorNo;
+            }
+
+            return getValue(variableName, floorNo + 1);
         }
 
         string getValue(string variableName, int floorNo) {
             int nowFloorNo = floorNo - 1;
 
-            if(nowFloorNo < 0) throw new UndefinedVariableException("未定義の変数へアクセスしようとした");
+            if(nowFloorNo < 0) {
+                //未定義の変数にアクセスしようとした
+                if(upstairEnvironment == null) throw new UndefinedVariableException("未定義の変数へアクセスしようとした");
+
+                //上位環境での取得を試みる
+                upstairEnvironment._GetValue(variableName, true, connectionFloorNo, looseConnection);
+            }
             if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) return floorDataFrames[nowFloorNo].Variables[variableName];
 
             return getValue(variableName, nowFloorNo);
@@ -82,26 +119,39 @@ namespace FlowRunner.Engine
 
             return value;
         }
-        string _SetValue(string variableName, string value) {
-            //今の階層にすでに変数がある場合は値を更新する
-            if (currentFloor.Variables.ContainsKey(variableName)) {
-                currentFloor.Variables[variableName] = value;
-                return value;
+        bool _SetValue(string variableName, string value, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
+            //フロアナンバーの決定
+            int floorNo;
+            if (!lowerboundAccess || _looseConnection) {
+                floorNo = currentFloorNo;
+            } else {
+                if (currentFloorNo < _connectionFloorNo) throw new MisalignedConnectionFloorNoException("指定されたコネクションフロアナンバーに該当する階層がない");
+                floorNo = _connectionFloorNo;
             }
 
-            //上位階層で登録されたら処理を抜ける
-            if(setValue(variableName, value, currentFloorNo)) return value;
+            //既存の変数に登録されたら処理を抜ける
+            bool higher = setValue(variableName, value, floorNo + 1);
+            if (!lowerboundAccess && higher) return true;
+
+            //下階からのアクセスの場合は上位階層で登録されていなくても処理を抜ける
+            if (lowerboundAccess && !higher) return false;
 
             //上位階層に対応する変数がない場合は今の階層に変数を新規追加する
             currentFloor.Variables.Add(variableName, value);
 
-            return value;
+            return true;
         }
         bool setValue(string variableName, string value, int floorNo) {
             int nowFloorNo = floorNo - 1;
 
-            //大域環境までに該当の変数がなかったらfalseを返す
-            if (nowFloorNo < 0) return false;
+            //大域環境までに該当の変数がなかった場合
+            if (nowFloorNo < 0) {
+                //上位環境が設定されていない場合はfalseを返す
+                if (upstairEnvironment == null) return false;
+
+                //上位環境でのセットを試みる
+                upstairEnvironment._SetValue(variableName, value, true, connectionFloorNo, looseConnection);
+            }
 
             //該当する変数がある場合は値を更新する
             if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) {
@@ -202,6 +252,10 @@ namespace FlowRunner.Engine
         //大域環境でアップ処理を行おうとした場合
         public class UpOnGlobalEnvironmentException : Exception { 
             public UpOnGlobalEnvironmentException(string text) :base(text){ }
+        }
+        //指定されたコネクションフロアナンバーに該当する階層がない場合
+        public class MisalignedConnectionFloorNoException : Exception { 
+            public MisalignedConnectionFloorNoException(string text) :base(text){ }
         }
 
     }
