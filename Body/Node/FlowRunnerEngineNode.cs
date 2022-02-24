@@ -205,6 +205,9 @@ namespace FlowRunner.Engine
         public bool CatchException_LabelResolutionMiss(IRunningContext runningContext, LabelResolutionMissException e) {
             return false;
         }
+        public bool CatchException_CallStackEmptyPop(IRunningContext runningContext, CallStackEmptyPopException e) {
+            return false;
+        }
         #endregion
 
         public void NodeAll(Action<string, INode> action) {
