@@ -80,6 +80,8 @@ namespace FlowRunner.Engine
         bool CatchException_ProgramCounterOutOfRange(IRunningContext runningContext, ProgramCounterOutOfRangeException e);
         //ラベルの解決に失敗したとき
         bool CatchException_LabelResolutionMiss(IRunningContext runningContext, LabelResolutionMissException e);
+        //空のコールスタックに対してPopしようとした
+        bool CatchException_CallStackEmptyPop(IRunningContext runningContext, CallStackEmptyPopException e);
     }
 
     //仕様
@@ -165,6 +167,9 @@ namespace FlowRunner.Engine
             } catch (LabelResolutionMissException e) {
                 //ラベルの解決に失敗したとき
                 if (!LabelRunOrdertaker.CatchException_LabelResolutionMiss(runningContext, e)) throw;
+            } catch (CallStackEmptyPopException e) {
+                //ラベルの解決に失敗したとき
+                if (!LabelRunOrdertaker.CatchException_CallStackEmptyPop(runningContext, e)) throw;
             } catch (Exception_atLabelRun e) {
                 //その他のLabelRunの例外
                 throw;//リスロー
@@ -256,6 +261,7 @@ namespace FlowRunner.Engine
             //コールスタックからPackCodeとPCを復元します
             bool packReloadFlag = false;
             if (commandExecutionContext.ReturnFlag) {
+                if (runningContext.CallStack.Count == 0) throw new CallStackEmptyPopException("空のコールスタックに対してPopしようとした");
                 StackFrame stackFrame = runningContext.CallStack.Pop();
 
                 if (stackFrame.PackCode != runningContext.CurrentPackCode) packReloadFlag = true;
@@ -336,6 +342,11 @@ namespace FlowRunner.Engine
     public class LabelResolutionMissException : Exception_atLabelRun
     {
         public LabelResolutionMissException(string? message) : base(message) { }
+    }
+    //空のコールスタックに対してPopしようとした
+    public class CallStackEmptyPopException : Exception_atLabelRun
+    {
+        public CallStackEmptyPopException(string? message) : base(message) { }
     }
 
 
