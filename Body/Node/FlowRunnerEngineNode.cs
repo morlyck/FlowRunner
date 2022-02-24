@@ -88,7 +88,7 @@ namespace FlowRunner
             {
             typ node = (typ)Activator.CreateInstance(typeof(typ), new object[] { Node, path });
 
-            node.SetNode(node);
+            Node.SetNode(node);
 
             return node;
         }
