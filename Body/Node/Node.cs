@@ -171,6 +171,22 @@ namespace FlowRunner.Engine
 
         //
         [Constructor]
+        void Constructor_CatchException_CallStackEmptyPop() {
+            if (Local_CatchException_CallStackEmptyPop == null) Local_CatchException_CallStackEmptyPop = Localize_CatchException_CallStackEmptyPop;
+        }
+        public bool CatchException_CallStackEmptyPop(IRunningContext runningContext, CallStackEmptyPopException e) {
+            var returnValue = Local_CatchException_CallStackEmptyPop(runningContext.Runner, e);
+            if (returnValue) return true;
+
+            return NodeOperationRelay(Path).CatchException_CallStackEmptyPop(runningContext, e);
+        }
+        public Func<IRunner, CallStackEmptyPopException, bool> Local_CatchException_CallStackEmptyPop = null;
+        protected virtual bool Localize_CatchException_CallStackEmptyPop(IRunner runner, CallStackEmptyPopException e) {
+            return false;
+        }
+
+        //
+        [Constructor]
         void Constructor_CatchException_ProgramCounterOutOfRange() {
             if (Local_CatchException_ProgramCounterOutOfRange == null) Local_CatchException_ProgramCounterOutOfRange = Localize_CatchException_ProgramCounterOutOfRange;
         }
@@ -191,6 +207,7 @@ namespace FlowRunner.Engine
         [Constructor]
         void Constructor_Serialize() {
             if (Local_Serialize == null) Local_Serialize = Localize_Serialize;
+            if(Local_SerializeAfter == null) Local_SerializeAfter = Localize_SerializeAfter;
         }
         public string Serialize() {
             var returnValue = Local_Serialize(true, null);
@@ -216,6 +233,7 @@ namespace FlowRunner.Engine
 
 
             //ローカルのシリアライズアフター
+            sdReady = Localize_SerializeAfter((sdReady as CustomNodeSdReady));
             if (returnValue.Item1) {
                 return Engine.Infra.GeneralSd.Serialize(Local_Serialize(false, (sdReady as CustomNodeSdReady)).Item2);
             } else {
@@ -224,8 +242,12 @@ namespace FlowRunner.Engine
 
         }
         public Func<bool, CustomNodeSdReady, (bool, CustomNodeSdReady)> Local_Serialize = null;
-        protected virtual (bool, CustomNodeSdReady) Localize_Serialize(bool beforeSwitch, CustomNodeSdReady sdReady) {
+        protected virtual (bool, (bool, CustomNodeSdReady)) Localize_Serialize(bool beforeSwitch, ref CustomNodeSdReady sdReady) {
             return (false, null);
+        }
+        public Func<CustomNodeSdReady, CustomNodeSdReady> Local_SerializeAfter = null;
+        protected virtual CustomNodeSdReady Localize_SerializeAfter(CustomNodeSdReady sdReady) {
+            return sdReady;
         }
 
         //デシリアライズ
