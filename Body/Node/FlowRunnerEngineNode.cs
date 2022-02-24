@@ -159,11 +159,7 @@ namespace FlowRunner.Engine
             nodes[path] = node;
         }
         public void SetNode(INode node) {
-            if (!nodes.ContainsKey(node.Path)) {
-                nodes.Add(node.Path, node);
-                return;
-            }
-            nodes[node.Path] = node;
+            SetNode(node.Path, node);
         }
         public INode NodeOperationRelay(string path) {
 
