@@ -27,7 +27,7 @@ namespace FlowRunner.Engine
         void HaltRun();
 
         RunningContext Context { get; set; }
-        ChainEnvironment ChainEnvironment { get; }
+        ChainEnvironment Environment { get; }
         VariableEventSubject VariableEventSubject { get; }
 
         InterruptController InterruptController { get; }
@@ -44,7 +44,7 @@ namespace FlowRunner.Engine
         public bool FrameSleep { get; set; } = false;
         public bool Deleted { get; set; } = false;
 
-        public string ChainEnvironmentText = "";
+        public string EnvironmentText = "";
         public string InterruptControllerText = "";
     }
 
@@ -58,7 +58,7 @@ namespace FlowRunner.Engine
             sdReady.FrameSleep = FrameSleep;
             sdReady.Deleted = Deleted;
             //
-            sdReady.ChainEnvironmentText = ChainEnvironment.Serialize(engine);
+            sdReady.EnvironmentText = Environment.Serialize(engine);
             sdReady.InterruptControllerText = InterruptController.Serialize(engine);
 
             return engine.Infra.GeneralSd.Serialize(sdReady);
@@ -72,8 +72,8 @@ namespace FlowRunner.Engine
             FrameSleep = sdReady.FrameSleep;
             Deleted = sdReady.Deleted;
             //
-            ChainEnvironment = new ChainEnvironment();
-            ChainEnvironment.Deserialize(engine, sdReady.ChainEnvironmentText);
+            Environment = new ChainEnvironment();
+            Environment.Deserialize(engine, sdReady.EnvironmentText);
 
             InterruptController = new InterruptController();
             InterruptController.Deserialize(engine, sdReady.InterruptControllerText);
@@ -87,7 +87,7 @@ namespace FlowRunner.Engine
         public void HaltRun() {
             Context.IsHalting = true;
         }
-        public ChainEnvironment ChainEnvironment { get; private set; } = new ChainEnvironment();
+        public ChainEnvironment Environment { get; private set; } = new ChainEnvironment();
 
         public VariableEventSubject VariableEventSubject { get; private set; } = new VariableEventSubject();
 
@@ -132,7 +132,7 @@ namespace FlowRunner.Engine
         //---
 
         void IRunnerEngineInside.StartCycleTime() {
-            ChainEnvironment.Ordertaker = VariableEventSubject;
+            Environment.Ordertaker = VariableEventSubject;
             
             //ランニングコンテキストのキャッシュの更新
             if (Context.CurrentPackCode != "") {
@@ -143,7 +143,7 @@ namespace FlowRunner.Engine
             InterruptController.RunningContext = Context;
 
             //スタート時実行機能の呼び出し用
-            VariableEventSubject.StartCycleTime(ChainEnvironment);
+            VariableEventSubject.StartCycleTime(Environment);
         }
 
 
