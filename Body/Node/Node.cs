@@ -210,7 +210,7 @@ namespace FlowRunner.Engine
             if(Local_SerializeAfter == null) Local_SerializeAfter = Localize_SerializeAfter;
         }
         public string Serialize() {
-            var returnValue = Local_Serialize(true, null);
+            var returnValue = Local_Serialize();
 
             bool engineRoot = NodeOperationRelay(Path).Path == "/";
             //sdReady
@@ -234,16 +234,12 @@ namespace FlowRunner.Engine
             //アフターの実行
             Localize_SerializeAfter((sdReady as CustomNodeSdReady));
 
-            //ローカルのシリアライズアフター
-            if (returnValue.Item1) {
-                return Engine.Infra.GeneralSd.Serialize(Local_Serialize(false, (sdReady as CustomNodeSdReady)).Item2);
-            } else {
-                return Engine.Infra.GeneralSd.Serialize((sdReady as CustomNodeSdReady));
-            }
+            //シリアライズの実行
+            return Engine.Infra.GeneralSd.Serialize((sdReady as CustomNodeSdReady));
 
         }
-        public Func<bool, CustomNodeSdReady, (bool, CustomNodeSdReady)> Local_Serialize = null;
-        protected virtual (bool, CustomNodeSdReady) Localize_Serialize(bool beforeSwitch, CustomNodeSdReady sdReady) {
+        public Func<(bool, CustomNodeSdReady)> Local_Serialize = null;
+        protected virtual (bool, CustomNodeSdReady) Localize_Serialize() {
             return (false, null);
         }
         public Action<CustomNodeSdReady> Local_SerializeAfter = null;
