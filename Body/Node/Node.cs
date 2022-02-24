@@ -231,9 +231,10 @@ namespace FlowRunner.Engine
             //ルートノードパスを保存しておく
             (sdReady as CustomNodeSdReady).RootNodeEngineManagementPath = Root.EngineManagedPath;
 
+            //アフターの実行
+            Localize_SerializeAfter((sdReady as CustomNodeSdReady));
 
             //ローカルのシリアライズアフター
-            sdReady = Localize_SerializeAfter((sdReady as CustomNodeSdReady));
             if (returnValue.Item1) {
                 return Engine.Infra.GeneralSd.Serialize(Local_Serialize(false, (sdReady as CustomNodeSdReady)).Item2);
             } else {
@@ -242,13 +243,11 @@ namespace FlowRunner.Engine
 
         }
         public Func<bool, CustomNodeSdReady, (bool, CustomNodeSdReady)> Local_Serialize = null;
-        protected virtual (bool, (bool, CustomNodeSdReady)) Localize_Serialize(bool beforeSwitch, ref CustomNodeSdReady sdReady) {
+        protected virtual (bool, CustomNodeSdReady) Localize_Serialize(bool beforeSwitch, CustomNodeSdReady sdReady) {
             return (false, null);
         }
-        public Func<CustomNodeSdReady, CustomNodeSdReady> Local_SerializeAfter = null;
-        protected virtual CustomNodeSdReady Localize_SerializeAfter(CustomNodeSdReady sdReady) {
-            return sdReady;
-        }
+        public Action<CustomNodeSdReady> Local_SerializeAfter = null;
+        protected virtual void Localize_SerializeAfter(CustomNodeSdReady sdReady) { }
 
         //デシリアライズ
         [Constructor]
