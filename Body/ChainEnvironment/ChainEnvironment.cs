@@ -194,7 +194,7 @@ namespace FlowRunner.Engine
             return existsValue(variableName, nowFloorNo);
         }
 
-        public void Down(List<string> returnValues, List<string> arguments) {
+        public void Down(List<string> returnValues = null, List<string> arguments = null) {
             FloorDataFrame underFloorDataFrame = new FloorDataFrame();
             floorDataFrames.Add(underFloorDataFrame);
 
@@ -205,14 +205,21 @@ namespace FlowRunner.Engine
             currentFloor = underFloorDataFrame;
         }
 
-        public void PullArguments(List<string> variables) {
+        public void PullArguments(List<string> variables = null) {
             if (currentFloorNo == 0) throw new Exception("大域環境で引数引き込みを行おうとした");
+
+            if (variables == null|| variables.Count == 0) return;
+
+            //呼び元が引数を省略したときは例外を投げる
+            //引数の省略時に規定値を入れる処理を入れずに例外とします。
+            if (currentFloor.Arguments == null) throw new InvalidPullArgumentsException("無効な引数引き込みを行おうとした");
+
 
             for (int count = 0; count < variables.Count; count++) {
                 SetValue(variables[count], getValue(currentFloor.Arguments[count], currentFloorNo));
             }
         }
-        public void Up(List<string> returnValues) {
+        public void Up(List<string> returnValues = null) {
             if (currentFloorNo == 0) throw new UpOnGlobalEnvironmentException("大域環境でアップ処理を行おうとした");
 
             int underFloorDataFrameNo = currentFloorNo;
@@ -220,8 +227,10 @@ namespace FlowRunner.Engine
             currentFloorNo--;
             currentFloor = floorDataFrames[currentFloorNo];
 
-            for(int count = 0; count < underFloorDataFrame.ReturnValues.Count; count++) {
-                SetValue(underFloorDataFrame.ReturnValues[count], getValue(returnValues[count], underFloorDataFrameNo + 1));
+            if(returnValues != null && underFloorDataFrame.ReturnValues != null) {
+                for (int count = 0; count < underFloorDataFrame.ReturnValues.Count; count++) {
+                    SetValue(underFloorDataFrame.ReturnValues[count], getValue(returnValues[count], underFloorDataFrameNo + 1));
+                }
             }
 
             floorDataFrames.Remove(underFloorDataFrame);
@@ -246,8 +255,14 @@ namespace FlowRunner.Engine
             public UndefinedVariableException(string text) : base(text) { }
         }
         //大域環境で引数引き込みを行おうとした場合
-        public class PullArgumentsOnGlobalEnvironmentException : Exception { 
-            public PullArgumentsOnGlobalEnvironmentException(string text) :base(text){ }
+        public class PullArgumentsOnGlobalEnvironmentException : Exception
+        {
+            public PullArgumentsOnGlobalEnvironmentException(string text) : base(text) { }
+        }
+        //無効な引数引き込みを行おうとした場合
+        public class InvalidPullArgumentsException : Exception
+        {
+            public InvalidPullArgumentsException(string text) : base(text) { }
         }
         //大域環境でアップ処理を行おうとした場合
         public class UpOnGlobalEnvironmentException : Exception { 
