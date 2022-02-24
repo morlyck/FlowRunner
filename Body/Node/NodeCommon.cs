@@ -44,6 +44,9 @@ namespace FlowRunner.Engine
     //---
     public class NodeSdReadyCommon
     {
+        //環境
+        public string EnvironmentText = "";
+        //
         public List<string> RunnerCodes = new List<string>();
         public List<string> RunnerTexts = new List<string>();
         public List<string> Contexts = new List<string>();
@@ -59,7 +62,12 @@ namespace FlowRunner.Engine
         Dictionary<string, Runner> runners = new Dictionary<string, Runner>();
         List<Runner> anonymousRunners = new List<Runner>();
 
+        //シリアライズ
         protected void NodeSerializerDelta(FlowRunnerEngine engine,ref NodeSdReadyCommon sdReady) {
+            //環境
+            sdReady.EnvironmentText = Environment.Serialize(engine);
+
+            //ランナー
             foreach (KeyValuePair<string, Runner> runner in runners) {
                 sdReady.RunnerCodes.Add(runner.Key);
                 sdReady.RunnerTexts.Add(runner.Value.Serialize(engine));
@@ -71,7 +79,13 @@ namespace FlowRunner.Engine
             }
 
         }
+
+        //デシリアライズ
         protected void NodeDeserializeDelta(FlowRunnerEngine engine, ref NodeSdReadyCommon sdReady) {
+            //環境
+            Environment.Deserialize(engine, sdReady.EnvironmentText);
+
+            //ランナー
             for (int index = 0; index < sdReady.RunnerCodes.Count; index++) {
                 Runner runner = new Runner(); 
                 runner.Deserialize(engine, sdReady.RunnerTexts[index]);
@@ -87,7 +101,11 @@ namespace FlowRunner.Engine
                 anonymousRunners.Add(runner);
             }
         }
+        //
+        //環境
+        public ChainEnvironment Environment { get; private set; } = new ChainEnvironment();
 
+        //
         public IRunner CreateAndSetRunner() {
             return CreateAndSetRunner(null, "");
         }
