@@ -251,7 +251,7 @@ namespace FlowRunner.Engine
             if (Local_Deserialize == null) Local_Deserialize = Localize_Deserialize;
         }
         public void Deserialize(FlowRunnerEngine engine, string text) {
-            var returnValue = Local_Deserialize(true, null, engine, text);
+            var returnValue = Local_Deserialize(engine, text);
             NodeSdReadyCommon sdReady;
             if (returnValue.Item1) {
                 sdReady = returnValue.Item2;
@@ -268,14 +268,9 @@ namespace FlowRunner.Engine
 
             //差分シリアライザを呼び出す
             NodeDeserializeDelta(engine, ref sdReady);
-
-
-
-            //アフター
-            if (returnValue.Item1) Local_Deserialize(false, (sdReady as CustomNodeSdReady), engine, text);
         }
-        public Func<bool, CustomNodeSdReady, FlowRunnerEngine, string, (bool, CustomNodeSdReady)> Local_Deserialize = null;
-        protected virtual (bool, CustomNodeSdReady) Localize_Deserialize(bool beforeSwitch, CustomNodeSdReady sdReady, FlowRunnerEngine engine, string text) {
+        public Func<FlowRunnerEngine, string, (bool, CustomNodeSdReady)> Local_Deserialize = null;
+        protected virtual (bool, CustomNodeSdReady) Localize_Deserialize(FlowRunnerEngine engine, string text) {
             return (false, null);
         }
 
