@@ -38,6 +38,25 @@ namespace FlowRunner.Engine
 
             return $"{Path}@{relativePath}";
         }
-    }
 
+        //
+        protected override (bool, CustomNodeSdReady) Localize_Serialize() {
+            SdReady sdReady = new SdReady();
+
+            sdReady.EntryPath = EntryPath;
+            return (true, sdReady);
+        }
+
+        protected override (bool, CustomNodeSdReady) Localize_Deserialize(FlowRunnerEngine engine, string text) {
+            SdReady sdReady = engine.Infra.GeneralSd.Deserialize<SdReady>(text);
+
+            EntryPath = sdReady.EntryPath;
+            return (true, sdReady);
+        }
+        //
+        public class SdReady : CustomNodeSdReady
+        {
+            public string EntryPath = "";
+        }
+    }
 }
