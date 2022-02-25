@@ -116,7 +116,7 @@ namespace FlowRunner.Engine
         void StartCycleTime();
     }
 
-    public class FlowRunnerEngineNode : NodeCommon, INode
+    public class FlowRunnerEngineNode : NodeCommon, INode, IFlowRunnerEngineNode
     {
         protected override ILabelRunOrdertaker LabelRunOrdertaker { get => this; }
         public FlowRunnerEngine Engine { get => engine; }
