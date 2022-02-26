@@ -18,9 +18,9 @@ namespace FlowRunner.Engine.Cycle
 
         //
         public string EngineNodeSerializeText = null;
-        public List<string> UpdateTimeEvacuationNode_TypeNames = null;
-        public List<string> UpdateTimeEvacuationNode_Paths = null;
-        public List<string> UpdateTimeEvacuationNode_SerializeTexts = null;
+        public List<string> UpdateEvacuationNode_TypeNames = null;
+        public List<string> UpdateEvacuationNode_Paths = null;
+        public List<string> UpdateEvacuationNode_SerializeTexts = null;
 
         //---
 
@@ -34,13 +34,15 @@ namespace FlowRunner.Engine.Cycle
                 //エンジンノード
                 if(path == "/") {
                     EngineNodeSerializeText = node.Serialize();
-                    UpdateTimeEvacuationNode_TypeNames = new List<string>();
-                    UpdateTimeEvacuationNode_Paths = new List<string>();
-                    UpdateTimeEvacuationNode_SerializeTexts = new List<string>();
-                    foreach (KeyValuePair<string,INode> keyValuePair in (node as INodeCnpn_fromEngine).UpdateTimeEvacuationNodes) {
-                        UpdateTimeEvacuationNode_TypeNames.Add(keyValuePair.Value.GetType().AssemblyQualifiedName);
-                        UpdateTimeEvacuationNode_Paths.Add(keyValuePair.Key);
-                        UpdateTimeEvacuationNode_SerializeTexts.Add(keyValuePair.Value.Serialize());
+
+                    //アップデートタイム時に退避していたノードのシリアライズ化
+                    UpdateEvacuationNode_TypeNames = new List<string>();
+                    UpdateEvacuationNode_Paths = new List<string>();
+                    UpdateEvacuationNode_SerializeTexts = new List<string>();
+                    foreach (KeyValuePair<string,INode> keyValuePair in (node as IFlowRunnerEngineNode).UpdateEvacuationNodes) {
+                        UpdateEvacuationNode_TypeNames.Add(keyValuePair.Value.GetType().AssemblyQualifiedName);
+                        UpdateEvacuationNode_Paths.Add(keyValuePair.Key);
+                        UpdateEvacuationNode_SerializeTexts.Add(keyValuePair.Value.Serialize());
                     }
                     return;
                 }
@@ -75,8 +77,8 @@ namespace FlowRunner.Engine.Cycle
             }
 
             //アップデートタイム時に退避していたノードもこのタイミングで登録する
-            for(int index  = 0; index < UpdateTimeEvacuationNode_Paths.Count; index++) {
-                CreateInstanceAndSet_byNode(engine, UpdateTimeEvacuationNode_TypeNames[index], UpdateTimeEvacuationNode_Paths[index]);
+            for(int index  = 0; index < UpdateEvacuationNode_Paths.Count; index++) {
+                CreateInstanceAndSet_byNode(engine, UpdateEvacuationNode_TypeNames[index], UpdateEvacuationNode_Paths[index]);
             }
 
             //各ノードのルートノードを再登録する
@@ -91,8 +93,8 @@ namespace FlowRunner.Engine.Cycle
                 */
             }
             //アップデートタイム時に退避していたノード
-            for (int index = 0; index < UpdateTimeEvacuationNode_Paths.Count; index++) {
-                Deserialize_byNode(engine, UpdateTimeEvacuationNode_Paths[index], UpdateTimeEvacuationNode_SerializeTexts[index]);
+            for (int index = 0; index < UpdateEvacuationNode_Paths.Count; index++) {
+                Deserialize_byNode(engine, UpdateEvacuationNode_Paths[index], UpdateEvacuationNode_SerializeTexts[index]);
             }
 
         }

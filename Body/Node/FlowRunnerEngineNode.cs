@@ -79,8 +79,20 @@ namespace FlowRunner
             Node = node;
         }
 
+        string UpdateTimeCycleName = "UpdateCycleTime";
+        public bool UpdateCycleTime {
+            get {
+                if (!Node.Environment.ExistsValue(UpdateTimeCycleName)) Node.Environment.SetValue(UpdateTimeCycleName, false.ToString());
+                return bool.Parse(Node.Environment.GetValue(UpdateTimeCycleName));
+            }
+            private set {
+                Node.Environment.SetValue(UpdateTimeCycleName, value.ToString());
+            }
+        }
         public void Update() {
+            UpdateCycleTime = true;
             Node.UpdateAll();
+            UpdateCycleTime = false;
         }
 
         public typ CreateAndSetNode<typ>(string path) 
@@ -115,6 +127,10 @@ namespace FlowRunner.Engine
         void Update();
         void StartCycleTime();
     }
+    public interface IFlowRunnerEngineNode
+    {
+        Dictionary<string, INode> UpdateEvacuationNodes { get; set; }
+    }
 
     public class FlowRunnerEngineNode : NodeCommon, INode, IFlowRunnerEngineNode
     {
@@ -146,12 +162,28 @@ namespace FlowRunner.Engine
         }
 
         public INode GetNode(string path) {
+            //アップデート時の退避ノードがあれば登録しておく
+            if((!engine.UpdateCycleTime) && UpdateEvacuationNodes.Count != 0) { 
+                foreach(KeyValuePair<string,INode> keyValuePair in UpdateEvacuationNodes) {
+                    SetNode(keyValuePair.Key, keyValuePair.Value);
+                }
+                UpdateEvacuationNodes.Clear();
+            }
+
             if (path.Trim() == "/") return this;
             //
             if (!nodes.ContainsKey(path)) return null;
             return nodes[path];
         }
+
+        public Dictionary<string, INode> UpdateEvacuationNodes { get; set; } = new Dictionary<string, INode>();
         public void SetNode(string path, INode node) {
+            //スクリプト実行中はNodeの追加ができないため一旦退避しておく
+            if (engine.UpdateCycleTime) {
+                UpdateEvacuationNodes.Add(path, node);
+                return;
+            }
+
             if (!nodes.ContainsKey(path)) {
                 nodes.Add(path, node);
                 return;
@@ -217,6 +249,16 @@ namespace FlowRunner.Engine
             foreach (KeyValuePair<string, INode> keyValuePair in nodes) {
                 keyValuePair.Value.Update();
             }
+
+            //アップデート時退避ノードのアップデートとノードの登録処理
+            if(UpdateEvacuationNodes.Count != 0) {
+                Dictionary<string, INode> temp = new Dictionary<string, INode>(UpdateEvacuationNodes);
+                UpdateEvacuationNodes.Clear();
+                foreach (KeyValuePair<string, INode> keyValuePair in temp) {
+                    keyValuePair.Value.Update();
+                    SetNode(keyValuePair.Key, keyValuePair.Value);
+                }
+            }
             this.Update();
         }
 
@@ -248,8 +290,6 @@ namespace FlowRunner.Engine
             //差分シリアライザを呼び出す
             NodeDeserializeDelta(engine, ref sdReady);
         }
-
-
 
     }
 }
