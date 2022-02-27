@@ -106,7 +106,7 @@ namespace FlowRunner.Engine
                 if(upstairEnvironment == null) throw new UndefinedVariableException("未定義の変数へアクセスしようとした");
 
                 //上位環境での取得を試みる
-                upstairEnvironment._GetValue(variableName, true, connectionFloorNo, looseConnection);
+                return upstairEnvironment._GetValue(variableName, true, connectionFloorNo, looseConnection);
             }
             if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) return floorDataFrames[nowFloorNo].Variables[variableName];
 
