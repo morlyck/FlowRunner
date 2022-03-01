@@ -131,7 +131,7 @@ namespace FlowRunner.Engine
 
             //既存の変数に登録されたら処理を抜ける
             bool higher = setValue(variableName, value, floorNo + 1);
-            if (!lowerboundAccess && higher) return true;
+            if (higher) return true;
 
             //下階からのアクセスの場合は上位階層で登録されていなくても処理を抜ける
             if (lowerboundAccess && !higher) return false;
@@ -150,7 +150,7 @@ namespace FlowRunner.Engine
                 if (upstairEnvironment == null) return false;
 
                 //上位環境でのセットを試みる
-                upstairEnvironment._SetValue(variableName, value, true, connectionFloorNo, looseConnection);
+                return upstairEnvironment._SetValue(variableName, value, true, connectionFloorNo, looseConnection);
             }
 
             //該当する変数がある場合は値を更新する
