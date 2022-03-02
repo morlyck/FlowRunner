@@ -71,6 +71,21 @@ namespace FlowRunner.Utl
             field.SetValue(target, value);
 
         }
+
+        public static void InvokeAction(this object target, string methodName, object arg) {
+            foreach (MethodInfo info in target.GetType().GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) {
+                if (info.Name != methodName) continue;
+                info.Invoke(target, new object[] { arg });
+            }
+        }
+
+        public static void InvokeAction(this object target, string methodName) {
+            foreach (MethodInfo info in target.GetType().GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) {
+                if (info.Name != methodName) continue;
+                info.Invoke(target, null);
+            }
+        }
+
     }
 
 
