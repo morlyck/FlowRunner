@@ -11,35 +11,49 @@ namespace FlowRunner.Engine
     {
 
         public void IgnitionGetValueEvent(Type dataType, string variableName, object value) {
-            if (!variableEventObservers.ContainsKey(variableName)) return;
+            string typeName = dataType.AssemblyQualifiedName;
+            if (!variableEventObservers.ContainsKey(typeName)) return;
+            if (!variableEventObservers[typeName].ContainsKey(variableName)) return;
 
-            string key = getTypeNameAndVariableName(dataType, variableName);
-            variableEventObservers[key].IgnitionNotifyGetEvent(value);
+            variableEventObservers[dataType.AssemblyQualifiedName][variableName].IgnitionNotifyGetEvent(value);
         }
 
         //string lastMainText = null;
         public void IgnitionSetValueEvent(Type dataType, string variableName, object value) {
-            if (!variableEventObservers.ContainsKey(variableName)) return;
+            string typeName = dataType.AssemblyQualifiedName;
+            if (!variableEventObservers.ContainsKey(typeName)) return;
+            if (!variableEventObservers[typeName].ContainsKey(variableName)) return;
 
-            string key = getTypeNameAndVariableName(dataType, variableName);
-            variableEventObservers[key].IgnitionNotifySetEvent(value);
+            variableEventObservers[dataType.AssemblyQualifiedName][variableName].IgnitionNotifySetEvent(value);
         }
 
-        Dictionary<string, IVariableEventObserver> variableEventObservers = new Dictionary<string, IVariableEventObserver>();
+        Dictionary<string, Dictionary<string, IVariableEventObserver>> variableEventObservers = new Dictionary<string, Dictionary<string, IVariableEventObserver>>();
         public void AddVariableSetValueEvent(IVariableEventObserver observer) {
-            string key = getTypeNameAndVariableName(observer.GetDataType(), observer.VariableName);
-            variableEventObservers.Add(key, observer);
-        }
+            Dictionary<string, IVariableEventObserver> observers;
+            string typeName = observer.GetDataType().AssemblyQualifiedName;
+            if (!variableEventObservers.ContainsKey(typeName)) {
+                observers = new Dictionary<string, IVariableEventObserver>();
+                observers.Add(observer.VariableName, observer);
+                variableEventObservers.Add(typeName, observers);
+                return;
+            }
 
-        string getTypeNameAndVariableName(Type type, string ariableName) {
-            return $"{type.AssemblyQualifiedName}|{ariableName}";
+            observers = variableEventObservers[typeName];
+            if (!observers.ContainsKey(observer.VariableName)) {
+                observers.Add(observer.VariableName, observer);
+                return;
+            }
+
+            observers[observer.VariableName] = observer;
         }
 
         public void StartCycleTime(ChainEnvironment chainEnvironment) {
-            foreach (KeyValuePair<string, IVariableEventObserver> keyValuePair in variableEventObservers) {
-                if (!keyValuePair.Value.ResumeIgnition || !chainEnvironment.ExistsValue(keyValuePair.Key)) continue;
+            foreach (KeyValuePair<string, Dictionary<string, IVariableEventObserver>> observersData in variableEventObservers) {
+                foreach (KeyValuePair<string, IVariableEventObserver> observerData in observersData.Value) {
+                    if (!observerData.Value.ResumeIgnition || !chainEnvironment.ExistsValue(observerData.Key)) continue;
 
-                keyValuePair.Value.IgnitionNotifySetEvent(chainEnvironment.GetValue(keyValuePair.Key));
+                    observerData.Value.IgnitionNotifySetEvent(chainEnvironment.GetValue(observerData.Key));
+                }
             }
         }
 

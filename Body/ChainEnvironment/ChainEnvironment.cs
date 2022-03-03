@@ -25,7 +25,16 @@ namespace FlowRunner.Engine
     }
     public class ChainEnvironment
     {
-        public IChainEnvironmentOrdertaker? Ordertaker = null;
+        IChainEnvironmentOrdertaker? ordertaker = null;
+        public IChainEnvironmentOrdertaker? Ordertaker {
+            get => ordertaker;
+            set {
+                ordertaker = value;
+                DataHolderAll((typeName, dataHolder) => {
+                    dataHolder.Ordertaker = ordertaker;
+                });
+            }
+        }
         //シリアライズ対応
         public string Serialize(FlowRunnerEngine engine) {
             ChainEnvironmentSdReady sdReady = new ChainEnvironmentSdReady();
@@ -91,7 +100,7 @@ namespace FlowRunner.Engine
         Dictionary<string, IChainEnvironmentDataHolder> dataHolders = new Dictionary<string, IChainEnvironmentDataHolder>();
 
         public ChainEnvironment() {
-            dataHolders.Add(typeof(string).AssemblyQualifiedName, new ChainEnvironmentDataHolder<string>());
+            //dataHolders.Add(typeof(string).AssemblyQualifiedName, new ChainEnvironmentDataHolder<string>());
         }
 
         void DataHolderAll(Action<string,IChainEnvironmentDataHolder> action) {
@@ -109,6 +118,7 @@ namespace FlowRunner.Engine
             if (!dataHolders.ContainsKey(typeName)) {
                 var dataHolderType = typeof(ChainEnvironmentDataHolder<>).MakeGenericType(Type.GetType(typeName));
                 IChainEnvironmentDataHolder dataHolder = Activator.CreateInstance(dataHolderType) as IChainEnvironmentDataHolder;
+                dataHolder.Ordertaker = Ordertaker;
                 if (upstairEnvironment != null) dataHolder.SetUpstairEnvironment(upstairEnvironment.GetDataHolder(typeName), looseConnection, connectionFloorNo);
                 dataHolders.Add(typeName, dataHolder);
                 return dataHolder;
@@ -323,6 +333,7 @@ namespace FlowRunner.Engine
         string Serialize(FlowRunnerEngine engine);
         void Deserialize(FlowRunnerEngine engine, string text);
         //---
+        IChainEnvironmentOrdertaker? Ordertaker { get; set; }
         void SetUpstairEnvironment(IChainEnvironmentDataHolder upstairEnvironment, bool looseConnection, int connectionFloorNo);
         void ClearUpstairEnvironmentSetting();
         //
@@ -355,7 +366,7 @@ namespace FlowRunner.Engine
     }
     public class ChainEnvironmentDataHolder<DataType>: IChainEnvironmentDataHolder
     {
-        public IChainEnvironmentOrdertaker? Ordertaker = null;
+        public IChainEnvironmentOrdertaker? Ordertaker { get; set; } = null;
         //シリアライズ対応
         public string Serialize(FlowRunnerEngine engine) {
             ChainEnvironmentDataHolderSdReady<DataType> sdReady = new ChainEnvironmentDataHolderSdReady<DataType>();
