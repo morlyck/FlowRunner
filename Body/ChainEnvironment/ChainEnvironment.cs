@@ -521,11 +521,29 @@ namespace FlowRunner.Engine
 
             return exists(variableName, currentFloorNo);
         }
+        bool _Exists(string variableName, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
+            //フロアナンバーの決定
+            int floorNo;
+            if (!lowerboundAccess || _looseConnection) {
+                floorNo = currentFloorNo;
+            } else {
+                if (currentFloorNo < _connectionFloorNo) throw new ChainEnvironment.MisalignedConnectionFloorNoException("指定されたコネクションフロアナンバーに該当する階層がない");
+                floorNo = _connectionFloorNo;
+            }
 
+            return exists(variableName, floorNo + 1);
+        }
         bool exists(string variableName, int floorNo) {
             int nowFloorNo = floorNo - 1;
 
-            if (nowFloorNo < 0) return false;
+            //if (nowFloorNo < 0) //return false;
+            if (nowFloorNo < 0) {
+                //上位環境が設定されていない場合はfalseを返す
+                if (upstairEnvironment == null) return false;
+
+                //上位環境での確認を続行する
+                return upstairEnvironment._Exists(variableName, true, connectionFloorNo, looseConnection);
+            }
             if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) return true;
 
             return exists(variableName, nowFloorNo);
