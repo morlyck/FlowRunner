@@ -50,7 +50,7 @@ namespace FlowRunner.Engine
         public void StartCycleTime(ChainEnvironment chainEnvironment) {
             foreach (KeyValuePair<string, Dictionary<string, IVariableEventObserver>> observersData in variableEventObservers) {
                 foreach (KeyValuePair<string, IVariableEventObserver> observerData in observersData.Value) {
-                    if (!observerData.Value.ResumeIgnition || !chainEnvironment.ExistsValue(observerData.Key)) continue;
+                    if (!observerData.Value.ResumeIgnition || !chainEnvironment.Exists(observerData.Key)) continue;
 
                     observerData.Value.IgnitionNotifySetEvent(chainEnvironment.GetValue(observerData.Key));
                 }

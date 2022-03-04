@@ -145,8 +145,8 @@ namespace FlowRunner.Engine
         public string CreateOrSetValue_Local(string variableName, string value) {
             return GetDataHolder(typeof(string).AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value) as string;
         }
-        public bool ExistsValue(string variableName) {
-            return GetDataHolder(typeof(string).AssemblyQualifiedName).ExistsValue(variableName);
+        public bool Exists(string variableName) {
+            return GetDataHolder(typeof(string).AssemblyQualifiedName).Exists(variableName);
         }
         #endregion
 
@@ -160,8 +160,8 @@ namespace FlowRunner.Engine
         public object CreateOrSetValue_Local(Type type, string variableName, object value) {
             return GetDataHolder(type.AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value);
         }
-        public bool ExistsValue(Type type, string variableName) {
-            return GetDataHolder(type.AssemblyQualifiedName).ExistsValue(variableName);
+        public bool Exists(Type type, string variableName) {
+            return GetDataHolder(type.AssemblyQualifiedName).Exists(variableName);
         }
         #endregion
 
@@ -174,8 +174,8 @@ namespace FlowRunner.Engine
         public DataType CreateOrSetValue_Local<DataType>(string variableName, object value) {
             return (DataType)GetDataHolder(typeof(DataType).AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value);
         }
-        public bool ExistsValue<DataType>(string variableName) {
-            return GetDataHolder(typeof(DataType).AssemblyQualifiedName).ExistsValue(variableName);
+        public bool Exists<DataType>(string variableName) {
+            return GetDataHolder(typeof(DataType).AssemblyQualifiedName).Exists(variableName);
         }
 
         #region(string)
@@ -340,7 +340,7 @@ namespace FlowRunner.Engine
         object GetValue(string variableName);
         object SetValue(string variableName, object value);
         object CreateOrSetValue_Local(string variableName, object value);
-        bool ExistsValue(string variableName);
+        bool Exists(string variableName);
         //
         void Down(List<string> returnValues, List<string> arguments);
         void PullArguments(List<string> variables);
@@ -515,19 +515,19 @@ namespace FlowRunner.Engine
 
             return value;
         }
-        public bool ExistsValue(string variableName) {
+        public bool Exists(string variableName) {
             if (currentFloor.Variables.ContainsKey(variableName)) return true;
 
-            return existsValue(variableName, CurrentFloorNo);
+            return exists(variableName, CurrentFloorNo);
         }
 
-        bool existsValue(string variableName, int floorNo) {
+        bool exists(string variableName, int floorNo) {
             int nowFloorNo = floorNo - 1;
 
             if (nowFloorNo < 0) return false;
             if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) return true;
 
-            return existsValue(variableName, nowFloorNo);
+            return exists(variableName, nowFloorNo);
         }
 
         public void Down(List<string> returnValues = null, List<string> arguments = null) {

@@ -82,7 +82,7 @@ namespace FlowRunner
         string UpdateTimeCycleName = "UpdateCycleTime";
         public bool UpdateCycleTime {
             get {
-                if (!Node.Environment.ExistsValue(UpdateTimeCycleName)) Node.Environment.SetValue(UpdateTimeCycleName, false.ToString());
+                if (!Node.Environment.Exists(UpdateTimeCycleName)) Node.Environment.SetValue(UpdateTimeCycleName, false.ToString());
                 return bool.Parse(Node.Environment.GetValue(UpdateTimeCycleName));
             }
             private set {
