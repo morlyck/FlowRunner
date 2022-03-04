@@ -23,8 +23,56 @@ namespace FlowRunner.Engine
         public List<string> SerializeText = new List<string>();
 
     }
-    public class ChainEnvironment
+    public interface IUpstairEnvironment
     {
+        bool MultiBand { get; }
+        IChainEnvironmentDataHolder GetDataHolder(string typeName);
+        IChainEnvironmentDataHolder TryGetDataHolder(string typeName);
+        void MultiBandDataHolderAll_Break(string typeName, Func<IChainEnvironmentDataHolder, bool> func);
+
+    }
+    public class MultiBandUpstairEnvironment: IUpstairEnvironment
+    {
+        ChainEnvironment targetEnvironment = null;
+        ChainEnvironment TargetEnvironment {
+            get => targetEnvironment;
+            set {
+                //一度に割り当てれるターゲット環境は一つまで
+                targetEnvironment?.ClearUpstairEnvironmentSetting();
+
+                targetEnvironment = value;
+                targetEnvironment.SetUpstairEnvironment_LooseConnection(this);
+            }
+        }
+        public MultiBandUpstairEnvironment() { }
+        public MultiBandUpstairEnvironment(ChainEnvironment environment) {
+            TargetEnvironment = environment;
+        }
+        //---
+        public List<IUpstairEnvironment> UpstairEnvironments = new List<IUpstairEnvironment>();
+
+        public bool MultiBand => true;
+
+        public IChainEnvironmentDataHolder GetDataHolder(string typeName) {
+            throw new NotImplementedException();
+        }
+        public IChainEnvironmentDataHolder TryGetDataHolder(string typeName) {
+            return null;
+        }
+
+        public void MultiBandDataHolderAll_Break(string typeName, Func<IChainEnvironmentDataHolder, bool> func) {
+            foreach (IUpstairEnvironment upstairEnvironment in UpstairEnvironments) {
+                targetEnvironment.SetUpstairEnvironment_LooseConnection(upstairEnvironment);
+                if (!func(targetEnvironment.GetDataHolder(typeName))) break;
+            }
+            //処理が終わったら自身をターゲット環境の上位環境に再セットしておく
+            targetEnvironment.SetUpstairEnvironment_LooseConnection(this);
+        }
+    }
+    public class ChainEnvironment: IUpstairEnvironment
+    {
+        public bool MultiBand { get => false; 
+        }
         IChainEnvironmentOrdertaker? ordertaker = null;
         public IChainEnvironmentOrdertaker? Ordertaker {
             get => ordertaker;
@@ -63,27 +111,33 @@ namespace FlowRunner.Engine
         }
 
         //---
-        ChainEnvironment? upstairEnvironment = null;
+        IUpstairEnvironment? upstairEnvironment = null;
         int connectionFloorNo = -1;
         bool looseConnection = false;
-        public void SetUpstairEnvironment_LooseConnection(ChainEnvironment upstairEnvironment) {
+        public void SetUpstairEnvironment_LooseConnection(IUpstairEnvironment upstairEnvironment) {
             this.upstairEnvironment = upstairEnvironment;
             looseConnection = true;
+            if (upstairEnvironment.MultiBand) return;
+
             DataHolderAll((typeName, dataHolder) => {
                 dataHolder.SetUpstairEnvironment(upstairEnvironment.GetDataHolder(typeName), looseConnection, connectionFloorNo);
             });
         }
-        public void SetUpstairEnvironment(ChainEnvironment upstairEnvironment, int connectionFloorNo) {
+        public void SetUpstairEnvironment(IUpstairEnvironment upstairEnvironment, int connectionFloorNo) {
             this.upstairEnvironment = upstairEnvironment;
             this.connectionFloorNo = connectionFloorNo;
             looseConnection = false;
+            if (upstairEnvironment.MultiBand) return;
+
             DataHolderAll((typeName, dataHolder) => {
                 dataHolder.SetUpstairEnvironment(upstairEnvironment.GetDataHolder(typeName), looseConnection, connectionFloorNo);
             });
         }
-        public void SetUpstairEnvironment_ConnectionToCurrentFloorNo(ChainEnvironment upstairEnvironment) {
+        public void SetUpstairEnvironment_ConnectionToCurrentFloorNo(IUpstairEnvironment upstairEnvironment) {
             this.upstairEnvironment = upstairEnvironment;
             looseConnection = false;
+            if (upstairEnvironment.MultiBand) return;
+
             DataHolderAll((typeName, dataHolder) => {
                 dataHolder.SetUpstairEnvironment(upstairEnvironment.GetDataHolder(typeName), looseConnection, connectionFloorNo);
             });
@@ -119,13 +173,25 @@ namespace FlowRunner.Engine
                 var dataHolderType = typeof(ChainEnvironmentDataHolder<>).MakeGenericType(Type.GetType(typeName));
                 IChainEnvironmentDataHolder dataHolder = Activator.CreateInstance(dataHolderType) as IChainEnvironmentDataHolder;
                 dataHolder.Ordertaker = Ordertaker;
-                if (upstairEnvironment != null) dataHolder.SetUpstairEnvironment(upstairEnvironment.GetDataHolder(typeName), looseConnection, connectionFloorNo);
+                if (upstairEnvironment != null && !upstairEnvironment.MultiBand) {
+                    var upstairEnvironmentDataHolder = upstairEnvironment.TryGetDataHolder(typeName);
+                    if(upstairEnvironmentDataHolder != null) dataHolder.SetUpstairEnvironment(upstairEnvironmentDataHolder, looseConnection, connectionFloorNo);
+                }
                 dataHolders.Add(typeName, dataHolder);
                 return dataHolder;
             }
 
             return dataHolders[typeName];
         }
+        public IChainEnvironmentDataHolder TryGetDataHolder(string typeName) {
+            if (!dataHolders.ContainsKey(typeName)) return null;
+
+            return dataHolders[typeName];
+        }
+        public void MultiBandDataHolderAll_Break(string typeName, Func<IChainEnvironmentDataHolder,bool> func) {
+            func(GetDataHolder(typeName));
+        }
+
         void DataHolderAction(List<string> typeNames, Action<string,IChainEnvironmentDataHolder> action, Action<string,IChainEnvironmentDataHolder> anotherAction) {
             foreach (KeyValuePair<string, IChainEnvironmentDataHolder> dataHolderData in dataHolders) {
                 if (typeNames.IndexOf(dataHolderData.Key) == -1) {
@@ -137,45 +203,92 @@ namespace FlowRunner.Engine
         }
         #region(string)
         public string GetValue(string variableName) {
-            return GetDataHolder(typeof(string).AssemblyQualifiedName).GetValue(variableName) as string;
+           return GetValue(typeof(string), variableName) as string;
         }
         public string SetValue(string variableName, string value) {
-            return GetDataHolder(typeof(string).AssemblyQualifiedName).SetValue(variableName, value) as string;
+            return SetValue(typeof(string), variableName, value) as string;
         }
         public string CreateOrSetValue_Local(string variableName, string value) {
-            return GetDataHolder(typeof(string).AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value) as string;
+            return CreateOrSetValue_Local(typeof(string), variableName, value) as string;
         }
         public bool Exists(string variableName) {
-            return GetDataHolder(typeof(string).AssemblyQualifiedName).Exists(variableName);
+            return Exists(typeof(string), variableName);
         }
         #endregion
 
         #region(object)
         public object GetValue(Type type, string variableName) {
-            return GetDataHolder(type.AssemblyQualifiedName).GetValue(variableName);
+            if (upstairEnvironment == null || !upstairEnvironment.MultiBand) return GetDataHolder(type.AssemblyQualifiedName).GetValue(false, variableName).Item1;
+
+            object returnValue = null;
+            bool get = false;
+            upstairEnvironment.MultiBandDataHolderAll_Break(type.AssemblyQualifiedName ,(dataHolder) => {
+                var result = dataHolder.GetValue(true, variableName);
+                //値が取得できると戻り値をセットしてループを切り上げる
+                if (result.Item2) {
+                    returnValue = result.Item1;
+                    get = true;
+                    return false;
+                }
+                return true;
+            });
+
+            //どの上位環境でも値を取得できなかった場合
+            if (!get) throw new ChainEnvironment.UndefinedVariableException("未定義の変数へアクセスしようとした"); ;
+
+            return returnValue;
         }
         public object SetValue(Type type, string variableName, object value) {
-            return GetDataHolder(type.AssemblyQualifiedName).SetValue(variableName, value);
+            if (upstairEnvironment == null || !upstairEnvironment.MultiBand) return GetDataHolder(type.AssemblyQualifiedName).SetValue(false, variableName, value);
+
+            bool set = false;
+            upstairEnvironment.MultiBandDataHolderAll_Break(type.AssemblyQualifiedName, (dataHolder) => {
+                //すべての上位環境の値を更新する
+                if (dataHolder.SetValue(true, variableName, value)) {
+                    set = true;
+                }
+
+                return true;
+            });
+
+            //もし上位環境全てに該当の変数がなかった場合はこの環境に新規追加する
+            if(!set) GetDataHolder(type.AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value);
+
+            return value;
         }
         public object CreateOrSetValue_Local(Type type, string variableName, object value) {
-            return GetDataHolder(type.AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value);
+            GetDataHolder(type.AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value);
+            return value;
         }
         public bool Exists(Type type, string variableName) {
-            return GetDataHolder(type.AssemblyQualifiedName).Exists(variableName);
+            if (upstairEnvironment == null || !upstairEnvironment.MultiBand) return GetDataHolder(type.AssemblyQualifiedName).Exists(variableName);
+            
+            bool returnValue = false;
+            upstairEnvironment.MultiBandDataHolderAll_Break(type.AssemblyQualifiedName, (dataHolder) => {
+                var result = dataHolder.Exists(variableName);
+                //一つでもtrueがあるとループを切り上げる
+                if (result) {
+                    returnValue = true;
+                    return false;
+                }
+                return true;
+            });
+
+            return returnValue;
         }
         #endregion
 
-        public DataType GetValue<DataType>(string variableName) {
-            return (DataType)GetDataHolder(typeof(DataType).AssemblyQualifiedName).GetValue(variableName);
+        public DataType? GetValue<DataType>(string variableName) {
+            return (DataType)GetValue(typeof(DataType), variableName);
         }
         public DataType SetValue<DataType>(string variableName, object value) {
-            return (DataType)GetDataHolder(typeof(DataType).AssemblyQualifiedName).SetValue(variableName, value);
+            return (DataType)SetValue(typeof(DataType), variableName, value);
         }
         public DataType CreateOrSetValue_Local<DataType>(string variableName, object value) {
-            return (DataType)GetDataHolder(typeof(DataType).AssemblyQualifiedName).CreateOrSetValue_Local(variableName, value);
+            return (DataType)CreateOrSetValue_Local(typeof(DataType), variableName, value);
         }
         public bool Exists<DataType>(string variableName) {
-            return GetDataHolder(typeof(DataType).AssemblyQualifiedName).Exists(variableName);
+            return Exists(typeof(DataType), variableName);
         }
 
         #region(string)
@@ -337,9 +450,9 @@ namespace FlowRunner.Engine
         void SetUpstairEnvironment(IChainEnvironmentDataHolder upstairEnvironment, bool looseConnection, int connectionFloorNo);
         void ClearUpstairEnvironmentSetting();
         //
-        object GetValue(string variableName);
-        object SetValue(string variableName, object value);
-        object CreateOrSetValue_Local(string variableName, object value);
+        (object, bool) GetValue(bool multiBandAccess, string variableName);
+        bool SetValue(bool multiBandAccess, string variableName, object value);
+        void CreateOrSetValue_Local(string variableName, object value);
         bool Exists(string variableName);
         //
         void Down(List<string> returnValues, List<string> arguments);
@@ -416,13 +529,13 @@ namespace FlowRunner.Engine
             currentFloor = floorDataFrames[currentFloorNo];
         }
 
-        public object GetValue(string variableName) {
-            var returnValue = _GetValue(variableName);
+        public (object,bool) GetValue(bool multiBandAccess, string variableName) {
+            var returnValue = _GetValue(multiBandAccess, variableName);
             //イベント発火
-            Ordertaker?.IgnitionGetValueEvent(typeof(DataType), variableName, returnValue);
+            Ordertaker?.IgnitionGetValueEvent(typeof(DataType), variableName, returnValue.Item1);
             return returnValue;
         }
-        DataType _GetValue(string variableName, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
+        (DataType?,bool) _GetValue(bool multiBandAccess, string variableName, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
             //フロアナンバーの決定
             int floorNo;
             if (!lowerboundAccess || _looseConnection) {
@@ -432,31 +545,34 @@ namespace FlowRunner.Engine
                 floorNo = _connectionFloorNo;
             }
 
-            return getValue(variableName, floorNo + 1);
+            return getValue(multiBandAccess, variableName, floorNo + 1);
         }
 
-        DataType getValue(string variableName, int floorNo) {
+        (DataType?, bool) getValue(bool multiBandAccess, string variableName, int floorNo) {
             int nowFloorNo = floorNo - 1;
 
             if (nowFloorNo < 0) {
                 //未定義の変数にアクセスしようとした
-                if (upstairEnvironment == null) throw new ChainEnvironment.UndefinedVariableException("未定義の変数へアクセスしようとした");
+                if (upstairEnvironment == null) {
+                    if (multiBandAccess) return (default(DataType), false);
+                    throw new ChainEnvironment.UndefinedVariableException("未定義の変数へアクセスしようとした");
+                } 
 
                 //上位環境での取得を試みる
-                return upstairEnvironment._GetValue(variableName, true, connectionFloorNo, looseConnection);
+                return upstairEnvironment._GetValue(multiBandAccess, variableName, true, connectionFloorNo, looseConnection);
             }
-            if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) return floorDataFrames[nowFloorNo].Variables[variableName];
+            if (floorDataFrames[nowFloorNo].Variables.ContainsKey(variableName)) return (floorDataFrames[nowFloorNo].Variables[variableName], true);
 
-            return getValue(variableName, nowFloorNo);
+            return getValue(multiBandAccess, variableName, nowFloorNo);
         }
-        public object SetValue(string variableName, object value) {
-            _SetValue(variableName, (DataType)value);
+        public bool SetValue(bool multiBandAccess, string variableName, object value) {
+            bool result = _SetValue(multiBandAccess, variableName, (DataType)value);
             //イベント発火
             Ordertaker?.IgnitionSetValueEvent(typeof(DataType), variableName, value);
 
-            return value;
+            return result;
         }
-        bool _SetValue(string variableName, DataType value, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
+        bool _SetValue(bool multiBandAccess, string variableName, DataType value, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
             //フロアナンバーの決定
             int floorNo;
             if (!lowerboundAccess || _looseConnection) {
@@ -467,18 +583,21 @@ namespace FlowRunner.Engine
             }
 
             //既存の変数に登録されたら処理を抜ける
-            bool higher = setValue(variableName, value, floorNo + 1);
+            bool higher = setValue(multiBandAccess, variableName, value, floorNo + 1);
             if (higher) return true;
 
             //下階からのアクセスの場合は上位階層で登録されていなくても処理を抜ける
             if (lowerboundAccess && !higher) return false;
+
+            //マルチバンドアクセスの場合は上位階層で登録されていなくても処理を抜ける
+            if (multiBandAccess) return false;
 
             //上位階層に対応する変数がない場合は今の階層に変数を新規追加する
             currentFloor.Variables.Add(variableName, value);
 
             return true;
         }
-        bool setValue(string variableName, DataType value, int floorNo) {
+        bool setValue(bool multiBandAccess, string variableName, DataType value, int floorNo) {
             int nowFloorNo = floorNo - 1;
 
             //大域環境までに該当の変数がなかった場合
@@ -487,7 +606,7 @@ namespace FlowRunner.Engine
                 if (upstairEnvironment == null) return false;
 
                 //上位環境でのセットを試みる
-                return upstairEnvironment._SetValue(variableName, value, true, connectionFloorNo, looseConnection);
+                return upstairEnvironment._SetValue(multiBandAccess, variableName, value, true, connectionFloorNo, looseConnection);
             }
 
             //該当する変数がある場合は値を更新する
@@ -497,24 +616,20 @@ namespace FlowRunner.Engine
             }
 
             //該当する変数がない場合は上位階層に投げる
-            return setValue(variableName, value, nowFloorNo);
+            return setValue(multiBandAccess, variableName, value, nowFloorNo);
         }
-        public object CreateOrSetValue_Local(string variableName, object value) {
+        public void CreateOrSetValue_Local(string variableName, object value) {
             _CreateOrSetValue_Local(variableName, (DataType)value);
             //イベント発火
             Ordertaker?.IgnitionSetValueEvent(typeof(DataType), variableName, value);
-
-            return value;
         }
-        DataType _CreateOrSetValue_Local(string variableName, DataType value) {
+        void _CreateOrSetValue_Local(string variableName, DataType value) {
             //今の階層に変数を追加または値の更新をする
             if (!currentFloor.Variables.ContainsKey(variableName)) {
                 currentFloor.Variables.Add(variableName, value);
             } else {
                 currentFloor.Variables[variableName] = value;
             }
-
-            return value;
         }
         public bool Exists(string variableName) {
             if (currentFloor.Variables.ContainsKey(variableName)) return true;
@@ -571,7 +686,7 @@ namespace FlowRunner.Engine
 
 
             for (int count = 0; count < variables.Count; count++) {
-                SetValue(variables[count], getValue(currentFloor.Arguments[count], currentFloorNo));
+                SetValue(false, variables[count], getValue(false, currentFloor.Arguments[count], currentFloorNo).Item1);
             }
         }
         public void Up(List<string> returnValues = null) {
@@ -584,7 +699,7 @@ namespace FlowRunner.Engine
 
             if (returnValues != null && underFloorDataFrame.ReturnValues != null) {
                 for (int count = 0; count < underFloorDataFrame.ReturnValues.Count; count++) {
-                    SetValue(underFloorDataFrame.ReturnValues[count], getValue(returnValues[count], underFloorDataFrameNo + 1));
+                    SetValue(false, underFloorDataFrame.ReturnValues[count], getValue(false, returnValues[count], underFloorDataFrameNo + 1).Item1);
                 }
             }
 
