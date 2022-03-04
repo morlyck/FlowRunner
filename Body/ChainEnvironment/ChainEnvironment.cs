@@ -346,7 +346,7 @@ namespace FlowRunner.Engine
         void PullArguments(List<string> variables);
         void Up(List<string> returnValues);
         //
-        int CurrentFloorNo { get; set; }
+        int CurrentFloorNo { get; }
 
     }
     public class ChainEnvironmentDataHolderSdReady<DataType> : NodeSdReadyCommon
@@ -381,9 +381,9 @@ namespace FlowRunner.Engine
             ChainEnvironmentDataHolderSdReady<DataType> sdReady = engine.Infra.GeneralSd.Deserialize<ChainEnvironmentDataHolderSdReady<DataType>>(text);
 
             floorDataFrames = sdReady.floorDataFrames;
-            CurrentFloorNo = sdReady.currentFloorNo;
+            currentFloorNo = sdReady.currentFloorNo;
 
-            currentFloor = floorDataFrames[CurrentFloorNo];
+            currentFloor = floorDataFrames[currentFloorNo];
         }
 
         //---
@@ -406,13 +406,14 @@ namespace FlowRunner.Engine
 
         List<FloorDataFrame<DataType>> floorDataFrames = null;
 
-        public int CurrentFloorNo { get; set; } = 0;
+        public int CurrentFloorNo { get=> currentFloorNo; }
+        int currentFloorNo = 0;
         FloorDataFrame<DataType> currentFloor = null;
 
         public ChainEnvironmentDataHolder() {
-            CurrentFloorNo = 0;
+            currentFloorNo = 0;
             floorDataFrames = new List<FloorDataFrame<DataType>> { new FloorDataFrame<DataType>() };
-            currentFloor = floorDataFrames[CurrentFloorNo];
+            currentFloor = floorDataFrames[currentFloorNo];
         }
 
         public object GetValue(string variableName) {
@@ -425,9 +426,9 @@ namespace FlowRunner.Engine
             //フロアナンバーの決定
             int floorNo;
             if (!lowerboundAccess || _looseConnection) {
-                floorNo = CurrentFloorNo;
+                floorNo = currentFloorNo;
             } else {
-                if (CurrentFloorNo < _connectionFloorNo) throw new ChainEnvironment.MisalignedConnectionFloorNoException("指定されたコネクションフロアナンバーに該当する階層がない");
+                if (currentFloorNo < _connectionFloorNo) throw new ChainEnvironment.MisalignedConnectionFloorNoException("指定されたコネクションフロアナンバーに該当する階層がない");
                 floorNo = _connectionFloorNo;
             }
 
@@ -459,9 +460,9 @@ namespace FlowRunner.Engine
             //フロアナンバーの決定
             int floorNo;
             if (!lowerboundAccess || _looseConnection) {
-                floorNo = CurrentFloorNo;
+                floorNo = currentFloorNo;
             } else {
-                if (CurrentFloorNo < _connectionFloorNo) throw new ChainEnvironment.MisalignedConnectionFloorNoException("指定されたコネクションフロアナンバーに該当する階層がない");
+                if (currentFloorNo < _connectionFloorNo) throw new ChainEnvironment.MisalignedConnectionFloorNoException("指定されたコネクションフロアナンバーに該当する階層がない");
                 floorNo = _connectionFloorNo;
             }
 
@@ -518,7 +519,7 @@ namespace FlowRunner.Engine
         public bool Exists(string variableName) {
             if (currentFloor.Variables.ContainsKey(variableName)) return true;
 
-            return exists(variableName, CurrentFloorNo);
+            return exists(variableName, currentFloorNo);
         }
 
         bool exists(string variableName, int floorNo) {
@@ -537,12 +538,12 @@ namespace FlowRunner.Engine
             underFloorDataFrame.Arguments = arguments;
             underFloorDataFrame.ReturnValues = returnValues;
 
-            CurrentFloorNo++;
+            currentFloorNo++;
             currentFloor = underFloorDataFrame;
         }
 
         public void PullArguments(List<string> variables = null) {
-            if (CurrentFloorNo == 0) throw new Exception("大域環境で引数引き込みを行おうとした");
+            if (currentFloorNo == 0) throw new Exception("大域環境で引数引き込みを行おうとした");
 
             if (variables == null || variables.Count == 0) return;
 
@@ -552,16 +553,16 @@ namespace FlowRunner.Engine
 
 
             for (int count = 0; count < variables.Count; count++) {
-                SetValue(variables[count], getValue(currentFloor.Arguments[count], CurrentFloorNo));
+                SetValue(variables[count], getValue(currentFloor.Arguments[count], currentFloorNo));
             }
         }
         public void Up(List<string> returnValues = null) {
-            if (CurrentFloorNo == 0) throw new ChainEnvironment.UpOnGlobalEnvironmentException("大域環境でアップ処理を行おうとした");
+            if (currentFloorNo == 0) throw new ChainEnvironment.UpOnGlobalEnvironmentException("大域環境でアップ処理を行おうとした");
 
-            int underFloorDataFrameNo = CurrentFloorNo;
-            FloorDataFrame<DataType> underFloorDataFrame = floorDataFrames[CurrentFloorNo];
-            CurrentFloorNo--;
-            currentFloor = floorDataFrames[CurrentFloorNo];
+            int underFloorDataFrameNo = currentFloorNo;
+            FloorDataFrame<DataType> underFloorDataFrame = floorDataFrames[currentFloorNo];
+            currentFloorNo--;
+            currentFloor = floorDataFrames[currentFloorNo];
 
             if (returnValues != null && underFloorDataFrame.ReturnValues != null) {
                 for (int count = 0; count < underFloorDataFrame.ReturnValues.Count; count++) {
