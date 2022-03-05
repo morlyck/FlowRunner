@@ -303,7 +303,14 @@ namespace FlowRunner.Engine
             GetDataHolder(typeof(string).AssemblyQualifiedName).Up(returnValues);
         }
         #endregion
-        public void Down(List<(Type, string)> returnValues = null, List<(Type, string)> arguments = null) {
+        List<(Type, string)> dummyReturnValues = new List<(Type, string)>();
+        List<(Type, string)> dummyArguments = new List<(Type, string)>();
+        public void Down() {
+            dummyReturnValues.Clear();
+            dummyArguments.Clear();
+            Down(dummyReturnValues, dummyArguments);
+        }
+        public void Down(List<(Type, string)> returnValues , List<(Type, string)> arguments = null) {
             Dictionary<string,List<string>> organizeReturnValues = new Dictionary<string, List<string>>();
             Dictionary<string,List<string>> organizeArguments = new Dictionary<string, List<string>>();
 
