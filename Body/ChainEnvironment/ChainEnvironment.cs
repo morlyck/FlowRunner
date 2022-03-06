@@ -153,20 +153,10 @@ namespace FlowRunner.Engine
         //
         Dictionary<string, IChainEnvironmentDataHolder> dataHolders = new Dictionary<string, IChainEnvironmentDataHolder>();
 
-        public ChainEnvironment() {
-            //dataHolders.Add(typeof(string).AssemblyQualifiedName, new ChainEnvironmentDataHolder<string>());
-        }
-
         void DataHolderAll(Action<string,IChainEnvironmentDataHolder> action) {
             foreach (KeyValuePair<string, IChainEnvironmentDataHolder> dataHolderData in dataHolders) {
                 action(dataHolderData.Key, dataHolderData.Value);
             }
-        }
-        public IChainEnvironmentDataHolder GetDataHolder(object obj) {
-            return GetDataHolder(obj.GetType().AssemblyQualifiedName);
-        }
-        public IChainEnvironmentDataHolder GetDataHolder<type>(object obj) {
-            return GetDataHolder(typeof(type).AssemblyQualifiedName);
         }
         public IChainEnvironmentDataHolder GetDataHolder(string typeName) {
             if (!dataHolders.ContainsKey(typeName)) {
@@ -338,14 +328,6 @@ namespace FlowRunner.Engine
             }
 
             //DataHolderの呼び出し
-            /*
-            foreach(KeyValuePair<string, List<string>> _returnValuesData in organizeReturnValues) {
-                string key = _returnValuesData.Key;
-                IChainEnvironmentDataHolder dataHolder = GetDataHolder(key);
-                List<string> _arguments = (!organizeArguments.ContainsKey(key)) ? null : organizeArguments[key];
-
-                dataHolder.Down(_returnValuesData.Value, _arguments);
-            }*/
             DataHolderAction(new List<string>(organizeReturnValues.Keys), 
                 (typeName, dataHolder) => {
                     List<string> _returnValues = organizeReturnValues[typeName];
@@ -373,13 +355,6 @@ namespace FlowRunner.Engine
             }
 
             //DataHolderの呼び出し
-            /*
-            foreach (KeyValuePair<string, List<string>> _variablesData in organizeVariables) {
-                string key = _variablesData.Key;
-                IChainEnvironmentDataHolder dataHolder = GetDataHolder(key);
-
-                dataHolder.Up(_variablesData.Value);
-            }*/
             DataHolderAction(new List<string>(organizeVariables.Keys),
                 (typeName, dataHolder) => {
                     dataHolder.PullArguments(organizeVariables[typeName]);
@@ -403,13 +378,6 @@ namespace FlowRunner.Engine
             }
 
             //DataHolderの呼び出し
-            /*
-            foreach (KeyValuePair<string, List<string>> _returnValuesData in organizeReturnValues) {
-                string key = _returnValuesData.Key;
-                IChainEnvironmentDataHolder dataHolder = GetDataHolder(key);
-
-                dataHolder.Up(_returnValuesData.Value);
-            }*/
             DataHolderAction(new List<string>(organizeReturnValues.Keys),
                 (typeName, dataHolder) => {
                     dataHolder.PullArguments(organizeReturnValues[typeName]);
