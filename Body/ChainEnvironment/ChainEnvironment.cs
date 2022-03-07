@@ -57,7 +57,15 @@ namespace FlowRunner.Engine
             throw new NotImplementedException();
         }
         public IChainEnvironmentDataHolder TryGetDataHolder(string typeName) {
-            return null;
+            IChainEnvironmentDataHolder returnValue = null;
+            foreach (IUpstairEnvironment upstairEnvironment in UpstairEnvironments) {
+                var dataHolder = upstairEnvironment.TryGetDataHolder(typeName);
+
+                //一番最初の環境の値を採用する
+                if (returnValue == null && dataHolder != null) returnValue = dataHolder;
+            }
+
+            return returnValue;
         }
 
         public void MultiBandDataHolderAll_Break(string typeName, Func<IChainEnvironmentDataHolder, bool> func) {
@@ -163,7 +171,7 @@ namespace FlowRunner.Engine
                 var dataHolderType = typeof(ChainEnvironmentDataHolder<>).MakeGenericType(Type.GetType(typeName));
                 IChainEnvironmentDataHolder dataHolder = Activator.CreateInstance(dataHolderType) as IChainEnvironmentDataHolder;
                 dataHolder.Ordertaker = Ordertaker;
-                if (upstairEnvironment != null && !upstairEnvironment.MultiBand) {
+                if (upstairEnvironment != null) {
                     var upstairEnvironmentDataHolder = upstairEnvironment.TryGetDataHolder(typeName);
                     if(upstairEnvironmentDataHolder != null) dataHolder.SetUpstairEnvironment(upstairEnvironmentDataHolder, looseConnection, connectionFloorNo);
                 }
@@ -174,9 +182,20 @@ namespace FlowRunner.Engine
             return dataHolders[typeName];
         }
         public IChainEnvironmentDataHolder TryGetDataHolder(string typeName) {
-            if (!dataHolders.ContainsKey(typeName)) return null;
+            //現環境にある場合は値を返す
+            if (dataHolders.ContainsKey(typeName)) return dataHolders[typeName];
 
-            return dataHolders[typeName];
+            //現環境になく上位環境もない場合はnullを返す
+            if (upstairEnvironment == null) return null;
+
+            //上位環境に問い合わせる
+            var dataHolder = upstairEnvironment.TryGetDataHolder(typeName);
+
+            //上位も含めてない場合はnull
+            if(dataHolder == null)return null;
+
+            //上位環境にある場合は現環境に新規追加
+            return GetDataHolder(typeName);
         }
         public void MultiBandDataHolderAll_Break(string typeName, Func<IChainEnvironmentDataHolder,bool> func) {
             func(GetDataHolder(typeName));
@@ -609,7 +628,7 @@ namespace FlowRunner.Engine
         public bool Exists(string variableName) {
             if (currentFloor.Variables.ContainsKey(variableName)) return true;
 
-            return exists(variableName, currentFloorNo);
+            return _Exists(variableName);
         }
         bool _Exists(string variableName, bool lowerboundAccess = false, int _connectionFloorNo = 0, bool _looseConnection = false) {
             //フロアナンバーの決定
