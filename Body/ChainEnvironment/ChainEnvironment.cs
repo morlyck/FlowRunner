@@ -248,7 +248,10 @@ namespace FlowRunner.Engine
             return returnValue;
         }
         public object SetValue(Type type, string variableName, object value) {
-            if (upstairEnvironment == null || !upstairEnvironment.MultiBand) return GetDataHolder(type.AssemblyQualifiedName).SetValue(false, variableName, value);
+            if (upstairEnvironment == null || !upstairEnvironment.MultiBand) {
+                GetDataHolder(type.AssemblyQualifiedName).SetValue(false, variableName, value);
+                return value;
+            }
 
             bool set = false;
             upstairEnvironment.MultiBandDataHolderAll_Break(type.AssemblyQualifiedName, (dataHolder) => {
