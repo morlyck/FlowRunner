@@ -92,19 +92,19 @@ namespace FlowRunner.Engine
             }
         }
         //シリアライズ対応
-        public string Serialize(FlowRunnerEngine engine) {
+        public string Serialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer serializer) {
             ChainEnvironmentSdReady sdReady = new ChainEnvironmentSdReady();
             foreach (KeyValuePair<string, IChainEnvironmentDataHolder> dataHolderData in dataHolders) {
                 sdReady.TypeNames.Add(dataHolderData.Key);
-                sdReady.SerializeText.Add(dataHolderData.Value.Serialize(engine));
+                sdReady.SerializeText.Add(dataHolderData.Value.Serialize(serializer));
             }
 
-            return engine.Infra.GeneralSd.Serialize(sdReady);
+            return serializer.Serialize(sdReady);
         }
 
         //デシリアライズ対応
-        public void Deserialize(FlowRunnerEngine engine, string text) {
-            ChainEnvironmentSdReady sdReady = engine.Infra.GeneralSd.Deserialize<ChainEnvironmentSdReady>(text);
+        public void Deserialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer deserializer, string text) {
+            ChainEnvironmentSdReady sdReady = deserializer.Deserialize<ChainEnvironmentSdReady>(text);
             for(int count = 0; count < sdReady.TypeNames.Count; count++) {
                 string typeName = sdReady.TypeNames[count];
                 string serializeText = sdReady.SerializeText[count];
@@ -112,7 +112,7 @@ namespace FlowRunner.Engine
                 var dataHolderType = typeof(ChainEnvironmentDataHolder<>).MakeGenericType(Type.GetType(typeName));
                 IChainEnvironmentDataHolder dataHolder = Activator.CreateInstance(dataHolderType) as IChainEnvironmentDataHolder;
 
-                dataHolder.Deserialize(engine, serializeText);
+                dataHolder.Deserialize(deserializer, serializeText);
 
                 dataHolders.Add(typeName, dataHolder);
             }
@@ -212,7 +212,7 @@ namespace FlowRunner.Engine
         }
         #region(string)
         public string GetValue(string variableName) {
-           return GetValue(typeof(string), variableName) as string;
+            return GetValue(typeof(string), variableName) as string;
         }
         public string SetValue(string variableName, string value) {
             return SetValue(typeof(string), variableName, value) as string;
@@ -440,8 +440,8 @@ namespace FlowRunner.Engine
     }
 
     public interface IChainEnvironmentDataHolder {
-        string Serialize(FlowRunnerEngine engine);
-        void Deserialize(FlowRunnerEngine engine, string text);
+        string Serialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer serializer);
+        void Deserialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer deserializer, string text);
         //---
         IChainEnvironmentOrdertaker? Ordertaker { get; set; }
         void SetUpstairEnvironment(IChainEnvironmentDataHolder upstairEnvironment, bool looseConnection, int connectionFloorNo);
@@ -478,17 +478,17 @@ namespace FlowRunner.Engine
     {
         public IChainEnvironmentOrdertaker? Ordertaker { get; set; } = null;
         //シリアライズ対応
-        public string Serialize(FlowRunnerEngine engine) {
+        public string Serialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer serializer) {
             ChainEnvironmentDataHolderSdReady<DataType> sdReady = new ChainEnvironmentDataHolderSdReady<DataType>();
             sdReady.floorDataFrames = floorDataFrames;
             sdReady.currentFloorNo = CurrentFloorNo;
 
-            return engine.Infra.GeneralSd.Serialize(sdReady);
+            return serializer.Serialize(sdReady);
         }
 
         //デシリアライズ対応
-        public void Deserialize(FlowRunnerEngine engine, string text) {
-            ChainEnvironmentDataHolderSdReady<DataType> sdReady = engine.Infra.GeneralSd.Deserialize<ChainEnvironmentDataHolderSdReady<DataType>>(text);
+        public void Deserialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer deserializer, string text) {
+            ChainEnvironmentDataHolderSdReady<DataType> sdReady = deserializer.Deserialize<ChainEnvironmentDataHolderSdReady<DataType>>(text);
 
             floorDataFrames = sdReady.floorDataFrames;
             currentFloorNo = sdReady.currentFloorNo;

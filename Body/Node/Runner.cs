@@ -58,7 +58,7 @@ namespace FlowRunner.Engine
             sdReady.FrameSleep = FrameSleep;
             sdReady.Deleted = Deleted;
             //
-            sdReady.EnvironmentText = Environment.Serialize(engine);
+            sdReady.EnvironmentText = Environment.Serialize(engine.Infra.GeneralSd);
             sdReady.InterruptControllerText = InterruptController.Serialize(engine);
 
             return engine.Infra.GeneralSd.Serialize(sdReady);
@@ -73,7 +73,7 @@ namespace FlowRunner.Engine
             Deleted = sdReady.Deleted;
             //
             Environment = new ChainEnvironment();
-            Environment.Deserialize(engine, sdReady.EnvironmentText);
+            Environment.Deserialize(engine.Infra.GeneralSd, sdReady.EnvironmentText);
 
             InterruptController = new InterruptController();
             InterruptController.Deserialize(engine, sdReady.InterruptControllerText);

@@ -65,7 +65,7 @@ namespace FlowRunner.Engine
         //シリアライズ
         protected void NodeSerializerDelta(FlowRunnerEngine engine,ref NodeSdReadyCommon sdReady) {
             //環境
-            sdReady.EnvironmentText = Environment.Serialize(engine);
+            sdReady.EnvironmentText = Environment.Serialize(engine.Infra.GeneralSd);
 
             //ランナー
             foreach (KeyValuePair<string, Runner> runner in runners) {
@@ -83,7 +83,7 @@ namespace FlowRunner.Engine
         //デシリアライズ
         protected void NodeDeserializeDelta(FlowRunnerEngine engine, ref NodeSdReadyCommon sdReady) {
             //環境
-            Environment.Deserialize(engine, sdReady.EnvironmentText);
+            Environment.Deserialize(engine.Infra.GeneralSd, sdReady.EnvironmentText);
 
             //ランナー
             for (int index = 0; index < sdReady.RunnerCodes.Count; index++) {
