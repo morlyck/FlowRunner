@@ -17,7 +17,7 @@ namespace FlowRunner.Engine
         void IgnitionGetValueEvent(Type dataType, string variableName, object value);
         void IgnitionSetValueEvent(Type dataType, string variableName, object value);
     }
-    public class ChainEnvironmentSdReady : NodeSdReadyCommon
+    public class ChainEnvironmentSdReady
     {
         public List<string> TypeNames = new List<string>();
         public List<string> SerializeText = new List<string>();
@@ -459,7 +459,7 @@ namespace FlowRunner.Engine
         int CurrentFloorNo { get; }
 
     }
-    public class ChainEnvironmentDataHolderSdReady<DataType> : NodeSdReadyCommon
+    public class ChainEnvironmentDataHolderSdReady<DataType> 
     {
         public List<FloorDataFrame<DataType>> floorDataFrames = null;
 
