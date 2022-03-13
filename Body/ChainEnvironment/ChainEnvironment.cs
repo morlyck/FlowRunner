@@ -92,7 +92,7 @@ namespace FlowRunner.Engine
             }
         }
         //シリアライズ対応
-        public string Serialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer serializer) {
+        public string Serialize(CommonElement.ISerializerAndDeserializer serializer) {
             ChainEnvironmentSdReady sdReady = new ChainEnvironmentSdReady();
             foreach (KeyValuePair<string, IChainEnvironmentDataHolder> dataHolderData in dataHolders) {
                 sdReady.TypeNames.Add(dataHolderData.Key);
@@ -103,7 +103,7 @@ namespace FlowRunner.Engine
         }
 
         //デシリアライズ対応
-        public void Deserialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer deserializer, string text) {
+        public void Deserialize(CommonElement.ISerializerAndDeserializer deserializer, string text) {
             ChainEnvironmentSdReady sdReady = deserializer.Deserialize<ChainEnvironmentSdReady>(text);
             for(int count = 0; count < sdReady.TypeNames.Count; count++) {
                 string typeName = sdReady.TypeNames[count];
@@ -440,8 +440,8 @@ namespace FlowRunner.Engine
     }
 
     public interface IChainEnvironmentDataHolder {
-        string Serialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer serializer);
-        void Deserialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer deserializer, string text);
+        string Serialize(CommonElement.ISerializerAndDeserializer serializer);
+        void Deserialize(CommonElement.ISerializerAndDeserializer deserializer, string text);
         //---
         IChainEnvironmentOrdertaker? Ordertaker { get; set; }
         void SetUpstairEnvironment(IChainEnvironmentDataHolder upstairEnvironment, bool looseConnection, int connectionFloorNo);
@@ -478,7 +478,7 @@ namespace FlowRunner.Engine
     {
         public IChainEnvironmentOrdertaker? Ordertaker { get; set; } = null;
         //シリアライズ対応
-        public string Serialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer serializer) {
+        public string Serialize(CommonElement.ISerializerAndDeserializer serializer) {
             ChainEnvironmentDataHolderSdReady<DataType> sdReady = new ChainEnvironmentDataHolderSdReady<DataType>();
             sdReady.floorDataFrames = floorDataFrames;
             sdReady.currentFloorNo = CurrentFloorNo;
@@ -487,7 +487,7 @@ namespace FlowRunner.Engine
         }
 
         //デシリアライズ対応
-        public void Deserialize(CommonElement.SerializeDeserialize.ISerializerAndDeserializer deserializer, string text) {
+        public void Deserialize(CommonElement.ISerializerAndDeserializer deserializer, string text) {
             ChainEnvironmentDataHolderSdReady<DataType> sdReady = deserializer.Deserialize<ChainEnvironmentDataHolderSdReady<DataType>>(text);
 
             floorDataFrames = sdReady.floorDataFrames;

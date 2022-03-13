@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FlowRunner.Engine
 {
-    public interface IGeneralSerializeDeserializeInfra : CommonElement.SerializeDeserialize.ISerializerAndDeserializer
+    public interface IGeneralSerializeDeserializeInfra : CommonElement.ISerializerAndDeserializer
     {
         string Serialize(object obj);
         typ Deserialize<typ>(string jsonText);
