@@ -1,5 +1,5 @@
 # FlowRunner
-(未完成)再開可能なフローを提供するライブラリ
+再開可能なフローを提供するライブラリ
 
 Copyright (c) 2022 morlyck
 Released under the MIT license
