@@ -68,6 +68,7 @@ namespace FlowRunner.Engine
         void IgnitionNotifySetEvent(object value);
 
         //再開時にイベントを発行するか否か
+        //true:イベントを発火する
         bool ResumeIgnition { get; set; }
     }
     public class VariableEventObserver<DataType>: IVariableEventObserver
